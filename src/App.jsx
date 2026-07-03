@@ -22,18 +22,18 @@ const RARITY_ORDER = ["N", "R", "SR", "SSR", "UR"];
 const GLOW_TIERS = ["SSR", "UR"]; // 這兩階會有發散光暈 + 閃亮效果
 
 const PEOPLE = [
-  { id: 1, name: "星野 陽菜", kana: "ホシノ ヒナ", type: "idol", group: "Prism*Link", no: "001", rarity: "UR", collected: true },
-  { id: 2, name: "百合川 澪", kana: "ユリカワ ミオ", type: "idol", group: "Prism*Link", no: "002", rarity: "SR", collected: true },
-  { id: 3, name: "橘 あかり", kana: "タチバナ アカリ", type: "idol", group: "Prism*Link", no: "003", rarity: "R", collected: false },
-  { id: 4, name: "神楽坂 蓮", kana: "カグラザカ レン", type: "idol", group: "月光カラット", no: "004", rarity: "SSR", collected: true },
-  { id: 5, name: "白瀬 ことね", kana: "シラセ コトネ", type: "idol", group: "月光カラット", no: "005", rarity: "N", collected: false },
-  { id: 6, name: "水無月 玲", kana: "ミナヅキ レイ", type: "actor", group: "劇団 灯", no: "006", rarity: "R", collected: true },
-  { id: 7, name: "朝比奈 蒼", kana: "アサヒナ アオイ", type: "actor", group: "劇団 灯", no: "007", rarity: "N", collected: false },
-  { id: 8, name: "深山 悠人", kana: "ミヤマ ユウト", type: "actor", group: "フリー", no: "008", rarity: "N", collected: false },
-  { id: 9, name: "雪村 りん", kana: "ユキムラ リン", type: "concafe", group: "夜想曲", no: "009", rarity: "SSR", collected: true },
-  { id: 10, name: "花菱 まや", kana: "ハナビシ マヤ", type: "concafe", group: "夜想曲", no: "010", rarity: "R", collected: false },
-  { id: 11, name: "紫藤 のあ", kana: "シドウ ノア", type: "concafe", group: "Cafe Lumière", no: "011", rarity: "N", collected: false },
-  { id: 12, name: "早乙女 楓", kana: "サオトメ カエデ", type: "idol", group: "月光カラット", no: "012", rarity: "SR", collected: true },
+  { id: 1, name: "星野 陽菜", kana: "ホシノ ヒナ", type: "idol", group_name: "Prism*Link", no: "001", rarity: "UR", collected: true },
+  { id: 2, name: "百合川 澪", kana: "ユリカワ ミオ", type: "idol", group_name: "Prism*Link", no: "002", rarity: "SR", collected: true },
+  { id: 3, name: "橘 あかり", kana: "タチバナ アカリ", type: "idol", group_name: "Prism*Link", no: "003", rarity: "R", collected: false },
+  { id: 4, name: "神楽坂 蓮", kana: "カグラザカ レン", type: "idol", group_name: "月光カラット", no: "004", rarity: "SSR", collected: true },
+  { id: 5, name: "白瀬 ことね", kana: "シラセ コトネ", type: "idol", group_name: "月光カラット", no: "005", rarity: "N", collected: false },
+  { id: 6, name: "水無月 玲", kana: "ミナヅキ レイ", type: "actor", group_name: "劇団 灯", no: "006", rarity: "R", collected: true },
+  { id: 7, name: "朝比奈 蒼", kana: "アサヒナ アオイ", type: "actor", group_name: "劇団 灯", no: "007", rarity: "N", collected: false },
+  { id: 8, name: "深山 悠人", kana: "ミヤマ ユウト", type: "actor", group_name: "フリー", no: "008", rarity: "N", collected: false },
+  { id: 9, name: "雪村 りん", kana: "ユキムラ リン", type: "concafe", group_name: "夜想曲", no: "009", rarity: "SSR", collected: true },
+  { id: 10, name: "花菱 まや", kana: "ハナビシ マヤ", type: "concafe", group_name: "夜想曲", no: "010", rarity: "R", collected: false },
+  { id: 11, name: "紫藤 のあ", kana: "シドウ ノア", type: "concafe", group_name: "Cafe Lumière", no: "011", rarity: "N", collected: false },
+  { id: 12, name: "早乙女 楓", kana: "サオトメ カエデ", type: "idol", group_name: "月光カラット", no: "012", rarity: "SR", collected: true },
 ];
 
 function initials(name) {
@@ -133,7 +133,7 @@ function DetailModal({ person, onClose, onToggle }) {
         <dl className="modal-meta">
           <div>
             <dt>所屬</dt>
-            <dd>{person.group}</dd>
+            <dd>{person.group_name}</dd>
           </div>
           <div>
             <dt>圖鑑編號</dt>
@@ -206,7 +206,7 @@ export default function IdolZukan() {
       const matchesRarity = activeRarity === "all" || p.rarity === activeRarity;
       const q = query.trim().toLowerCase();
       const matchesQuery =
-        !q || p.name.toLowerCase().includes(q) || p.kana.toLowerCase().includes(q) || p.group.toLowerCase().includes(q);
+        !q || p.name.toLowerCase().includes(q) || p.kana.toLowerCase().includes(q) || (p.group_name || "").toLowerCase().includes(q);
       return matchesType && matchesRarity && matchesQuery;
     });
   }, [people, query, activeType, activeRarity]);
