@@ -65,37 +65,20 @@ function initials(name) {
   return name.slice(0, 1);
 }
 
-function CornerOrnament({ style, color }) {
+function RarityHeart({ rarity, variant, size = "sm" }) {
+  const rmeta = RARITY_META[rarity];
+  const bg = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.bg;
   return (
-    <svg className="corner-orn" style={{ ...style, color }} viewBox="0 0 40 40" width="28" height="28" aria-hidden="true">
-      <path d="M4 4 Q4 24 24 24 Q34 24 34 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M4 4 Q4 15 15 15" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" opacity="0.55" />
-      <g transform="translate(34,14)">
-        <path d="M0 -6 L0 6 M-6 0 L6 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        <path d="M-3.2 -3.2 L3.2 3.2 M-3.2 3.2 L3.2 -3.2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
-      </g>
-      <circle cx="4" cy="4" r="2.3" fill="currentColor" />
-    </svg>
-  );
-}
-
-function RarityMedallion({ person }) {
-  return (
-    <div className="medallion-wrap">
-      <span className="medallion-burst" aria-hidden="true" />
-      <span className="medallion-spark medallion-spark-l">✦</span>
-      <span className="rarity-medallion">
-        {RARITY_META[person.rarity].label}
-        <span className="medallion-shine" aria-hidden="true" />
-      </span>
-      <span className="medallion-spark medallion-spark-r">✦</span>
-    </div>
+    <span className={`rarity-heart rarity-heart--${size}`} style={{ "--rarity-bg": bg }} aria-hidden="true">
+      <span className="rh-lobe rh-lobe-l" />
+      <span className="rh-lobe rh-lobe-r" />
+      <span className="rarity-heart-label">{rmeta.label}</span>
+    </span>
   );
 }
 
 function PersonCard({ person, onOpen }) {
   const meta = TYPE_META[person.type];
-  const rmeta = RARITY_META[person.rarity];
   const isGlow = GLOW_TIERS.includes(person.rarity);
   const rbg = getRarityBg(person);
   const rsolid = getRaritySolid(person);
@@ -103,7 +86,9 @@ function PersonCard({ person, onOpen }) {
     <div className="card-slot" style={{ "--accent": meta.accent, "--soft": meta.soft, "--rarity-bg": rbg, "--rarity-solid": rsolid }}>
       <div className={`card-frame rarity-${person.rarity}`}>
         <button className={`candy-card ${isGlow ? "is-glow" : ""}`} onClick={() => onOpen(person)} aria-label={`查看 ${person.name}`}>
-          <span className="rarity-tag">{rmeta.label}</span>
+          <span className="heart-slot heart-slot--card">
+            <RarityHeart rarity={person.rarity} variant={person.variant} size="sm" />
+          </span>
           <div className="portrait" aria-hidden="true">
             {person.photo_url ? (
               <img className="portrait-photo" src={person.photo_url} alt="" />
@@ -123,8 +108,8 @@ function PersonCard({ person, onOpen }) {
           <div className="card-info">
             <p className="card-name">{person.name}</p>
             <p className="card-kana">{person.kana}</p>
+            <span className="type-chip type-chip-inline">{meta.label}</span>
           </div>
-          <span className="type-chip">{meta.label}</span>
           {isGlow && <span className="shine-sweep" aria-hidden="true" />}
         </button>
       </div>
@@ -171,11 +156,9 @@ function DetailModal({ person, onClose }) {
                     </>
                   )}
                 </div>
-                <CornerOrnament style={{ position: "absolute", top: 8, left: 8 }} color={rsolid} />
-                <CornerOrnament style={{ position: "absolute", top: 8, right: 8, transform: "scaleX(-1)" }} color={rsolid} />
-                <CornerOrnament style={{ position: "absolute", bottom: 8, left: 8, transform: "scaleY(-1)" }} color={rsolid} />
-                <CornerOrnament style={{ position: "absolute", bottom: 8, right: 8, transform: "scale(-1,-1)" }} color={rsolid} />
-                <RarityMedallion person={person} />
+                <span className="heart-slot heart-slot--modal">
+                  <RarityHeart rarity={person.rarity} variant={person.variant} size="lg" />
+                </span>
                 <div className="nameplate">
                   <p className="nameplate-name">{person.name}</p>
                   <span className="nameplate-divider">✦</span>
@@ -391,12 +374,11 @@ export default function IdolZukan() {
         }
         @keyframes shine-sweep { 0% { background-position: 220% 220%; } 100% { background-position: -40% -40%; } }
 
-        .rarity-tag {
-          position: absolute; top: 8px; left: 8px; z-index: 3;
+        .rarity-tag.static-tag {
+          display: inline-block; margin-bottom: 10px; white-space: nowrap;
           background: var(--rarity-bg); color: white; font-size: 10px; font-weight: 800;
-          padding: 3px 8px; border-radius: 999px; box-shadow: 0 2px 0 rgba(0,0,0,0.08); letter-spacing: 0.03em;
+          padding: 4px 10px; border-radius: 999px; box-shadow: 0 2px 0 rgba(0,0,0,0.08); letter-spacing: 0.03em;
         }
-        .rarity-tag.static-tag { position: static; display: inline-block; margin-bottom: 10px; white-space: nowrap; }
 
         .portrait {
           flex: 1; display: flex; align-items: center; justify-content: center; position: relative;
@@ -414,14 +396,19 @@ export default function IdolZukan() {
         .t3 { top: 55%; right: 30%; font-size: 9px; animation-delay: 0.8s; }
         @keyframes twinkle { 0%,100% { opacity: 0.2; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.15); } }
 
-        .card-info { padding: 6px 10px 24px; text-align: center; }
+        .card-info { padding: 6px 10px 12px; text-align: center; }
         .card-name { margin: 0; font-size: 13px; font-weight: 800; }
         .card-kana { margin: 1px 0 0; font-size: 10px; color: var(--ink-soft); font-weight: 600; }
+        .heart-slot { position: absolute; z-index: 5; }
+        .heart-slot--card { top: 6px; left: 6px; }
+        .heart-slot--modal { top: 10px; left: 10px; }
+
         .type-chip {
-          position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+          display: inline-block;
           font-size: 9.5px; font-weight: 800; background: var(--accent); color: white;
           padding: 3px 10px; border-radius: 999px; white-space: nowrap;
         }
+        .type-chip-inline { margin-top: 5px; }
 
         /* ---------- 彈窗翻牌 ---------- */
         .modal-backdrop {
@@ -462,29 +449,21 @@ export default function IdolZukan() {
         .frame-photo { position: absolute; inset: 0; background: linear-gradient(160deg, var(--accent) 0%, var(--soft) 140%); display: flex; align-items: center; justify-content: center; }
         .frame-photo-img { width: 100%; height: 100%; object-fit: cover; }
         .frame-photo-glyph { font-size: 64px; font-weight: 800; color: white; text-shadow: 0 3px 0 rgba(0,0,0,0.1); }
-        .corner-orn { position: absolute; z-index: 4; opacity: 0.92; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
-
-        .medallion-wrap { position: absolute; top: 8px; left: 8px; z-index: 5; width: 62px; height: 62px; display: flex; align-items: center; justify-content: center; }
-        .medallion-burst {
-          position: absolute; inset: -2px; border-radius: 50%;
-          background: repeating-conic-gradient(rgba(255,255,255,0.85) 0deg 3deg, transparent 3deg 20deg);
-          opacity: 0.5; animation: burst-spin 7s linear infinite;
+        .rarity-heart { position: relative; display: block; --hs: 30px; width: var(--hs); height: calc(var(--hs) * 0.9); filter: drop-shadow(0 2px 4px rgba(74,46,67,0.4)); }
+        .rarity-heart--sm { --hs: 30px; }
+        .rarity-heart--lg { --hs: 52px; }
+        .rh-lobe {
+          position: absolute; top: 0; width: calc(var(--hs) * 0.52); height: calc(var(--hs) * 0.8);
+          background: var(--rarity-bg); border-radius: calc(var(--hs) * 0.5) calc(var(--hs) * 0.5) 0 0;
         }
-        @keyframes burst-spin { to { transform: rotate(360deg); } }
-        .rarity-medallion {
-          position: relative; z-index: 1; width: 44px; height: 44px; border-radius: 50%;
-          background: var(--rarity-bg); color: white; display: flex; align-items: center; justify-content: center;
-          font-size: 14px; font-weight: 800; letter-spacing: 0.02em; overflow: hidden;
-          box-shadow: 0 0 0 2px white, 0 0 0 4px var(--rarity-solid), 0 4px 10px -4px rgba(0,0,0,0.4);
+        .rh-lobe-l { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+        .rh-lobe-r { left: calc(var(--hs) * 0.48); transform: rotate(-45deg); transform-origin: 0 100%; }
+        .rarity-heart-label {
+          position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
+          padding-top: 8%; color: white; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.35);
         }
-        .medallion-shine {
-          position: absolute; inset: 0;
-          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.75) 48%, transparent 65%);
-          background-size: 220% 220%; animation: shine-sweep 3s ease-in-out infinite;
-        }
-        .medallion-spark { position: absolute; color: white; font-size: 11px; text-shadow: 0 0 4px rgba(0,0,0,0.3); animation: twinkle 1.8s ease-in-out infinite; }
-        .medallion-spark-l { left: -6px; top: 50%; transform: translateY(-50%); }
-        .medallion-spark-r { right: -6px; top: 50%; transform: translateY(-50%); animation-delay: 0.5s; }
+        .rarity-heart--sm .rarity-heart-label { font-size: 8.5px; }
+        .rarity-heart--lg .rarity-heart-label { font-size: 14px; }
 
         .nameplate {
           position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
