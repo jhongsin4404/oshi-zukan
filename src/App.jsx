@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Heart, X, Star } from "lucide-react";
+import { Search, X, RotateCw } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
 // ---------- Mock data ----------
@@ -10,139 +10,163 @@ const TYPE_META = {
   concafe: { label: "コンカフェ嬢", accent: "#B48CFF", soft: "#ECE1FF" },
 };
 
-// 稀有度：五階段，星星數 = 稀有等級，數字越高越難抽到
+// 稀有度：五階段，等級用英文字母表示
 const RARITY_META = {
-  N: { label: "N", name: "ノーマル", stars: 1, color: "#B9AFC7", soft: "#F1EDF6" },
-  R: { label: "R", name: "レア", stars: 2, color: "#5FA8FF", soft: "#E4F0FF" },
-  SR: { label: "SR", name: "スペシャルレア", stars: 3, color: "#FFB23C", soft: "#FFF1DA" },
-  SSR: { label: "SSR", name: "プレミアムレア", stars: 4, color: "#FF6FA0", soft: "#FFE9F2" },
-  UR: { label: "UR", name: "アルティメットレア", stars: 5, color: "#B84DFF", soft: "#F3E6FF" },
+  N: { label: "N", name: "ノーマル", color: "#B9AFC7", soft: "#F1EDF6" },
+  R: { label: "R", name: "レア", color: "#5FA8FF", soft: "#E4F0FF" },
+  SR: { label: "SR", name: "スペシャルレア", color: "#FFB23C", soft: "#FFF1DA" },
+  SSR: { label: "SSR", name: "プレミアムレア", color: "#FF6FA0", soft: "#FFE9F2" },
+  UR: { label: "UR", name: "アルティメットレア", color: "#B84DFF", soft: "#F3E6FF" },
 };
 const RARITY_ORDER = ["N", "R", "SR", "SSR", "UR"];
 const GLOW_TIERS = ["SSR", "UR"]; // 這兩階會有發散光暈 + 閃亮效果
 
 const PEOPLE = [
-  { id: 1, name: "星野 陽菜", kana: "ホシノ ヒナ", type: "idol", group_name: "Prism*Link", no: "001", rarity: "UR", collected: true },
-  { id: 2, name: "百合川 澪", kana: "ユリカワ ミオ", type: "idol", group_name: "Prism*Link", no: "002", rarity: "SR", collected: true },
-  { id: 3, name: "橘 あかり", kana: "タチバナ アカリ", type: "idol", group_name: "Prism*Link", no: "003", rarity: "R", collected: false },
-  { id: 4, name: "神楽坂 蓮", kana: "カグラザカ レン", type: "idol", group_name: "月光カラット", no: "004", rarity: "SSR", collected: true },
-  { id: 5, name: "白瀬 ことね", kana: "シラセ コトネ", type: "idol", group_name: "月光カラット", no: "005", rarity: "N", collected: false },
-  { id: 6, name: "水無月 玲", kana: "ミナヅキ レイ", type: "actor", group_name: "劇団 灯", no: "006", rarity: "R", collected: true },
-  { id: 7, name: "朝比奈 蒼", kana: "アサヒナ アオイ", type: "actor", group_name: "劇団 灯", no: "007", rarity: "N", collected: false },
-  { id: 8, name: "深山 悠人", kana: "ミヤマ ユウト", type: "actor", group_name: "フリー", no: "008", rarity: "N", collected: false },
-  { id: 9, name: "雪村 りん", kana: "ユキムラ リン", type: "concafe", group_name: "夜想曲", no: "009", rarity: "SSR", collected: true },
-  { id: 10, name: "花菱 まや", kana: "ハナビシ マヤ", type: "concafe", group_name: "夜想曲", no: "010", rarity: "R", collected: false },
-  { id: 11, name: "紫藤 のあ", kana: "シドウ ノア", type: "concafe", group_name: "Cafe Lumière", no: "011", rarity: "N", collected: false },
-  { id: 12, name: "早乙女 楓", kana: "サオトメ カエデ", type: "idol", group_name: "月光カラット", no: "012", rarity: "SR", collected: true },
+  { id: 1, name: "星野 陽菜", kana: "ホシノ ヒナ", type: "idol", group_name: "Prism*Link", no: "001", rarity: "UR" },
+  { id: 2, name: "百合川 澪", kana: "ユリカワ ミオ", type: "idol", group_name: "Prism*Link", no: "002", rarity: "SR" },
+  { id: 3, name: "橘 あかり", kana: "タチバナ アカリ", type: "idol", group_name: "Prism*Link", no: "003", rarity: "R" },
+  { id: 4, name: "神楽坂 蓮", kana: "カグラザカ レン", type: "idol", group_name: "月光カラット", no: "004", rarity: "SSR" },
+  { id: 5, name: "白瀬 ことね", kana: "シラセ コトネ", type: "idol", group_name: "月光カラット", no: "005", rarity: "N" },
+  { id: 6, name: "水無月 玲", kana: "ミナヅキ レイ", type: "actor", group_name: "劇団 灯", no: "006", rarity: "R" },
+  { id: 7, name: "朝比奈 蒼", kana: "アサヒナ アオイ", type: "actor", group_name: "劇団 灯", no: "007", rarity: "N" },
+  { id: 8, name: "深山 悠人", kana: "ミヤマ ユウト", type: "actor", group_name: "フリー", no: "008", rarity: "N" },
+  { id: 9, name: "雪村 りん", kana: "ユキムラ リン", type: "concafe", group_name: "夜想曲", no: "009", rarity: "SSR" },
+  { id: 10, name: "花菱 まや", kana: "ハナビシ マヤ", type: "concafe", group_name: "夜想曲", no: "010", rarity: "R" },
+  { id: 11, name: "紫藤 のあ", kana: "シドウ ノア", type: "concafe", group_name: "Cafe Lumière", no: "011", rarity: "N" },
+  { id: 12, name: "早乙女 楓", kana: "サオトメ カエデ", type: "idol", group_name: "月光カラット", no: "012", rarity: "SR" },
 ];
 
 function initials(name) {
   return name.slice(0, 1);
 }
 
-function RarityStars({ rarity, size = 10 }) {
-  const meta = RARITY_META[rarity];
+function CornerOrnament({ style, color }) {
   return (
-    <span className="rarity-stars" style={{ "--rc": meta.color }}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star key={i} size={size} fill={i < meta.stars ? meta.color : "transparent"} stroke={meta.color} strokeWidth={1.5} />
-      ))}
-    </span>
+    <svg className="corner-orn" style={{ ...style, color }} viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
+      <path d="M4 4 Q4 22 22 22 Q32 22 32 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="32" cy="12" r="3" fill="currentColor" />
+      <circle cx="4" cy="4" r="2.5" fill="currentColor" />
+    </svg>
   );
 }
 
-function PersonCard({ person, onToggle, onOpen }) {
+function PersonCard({ person, onOpen }) {
   const meta = TYPE_META[person.type];
   const rmeta = RARITY_META[person.rarity];
   const isGlow = GLOW_TIERS.includes(person.rarity);
   return (
     <div className="card-slot" style={{ "--accent": meta.accent, "--soft": meta.soft, "--rarity": rmeta.color, "--rarity-soft": rmeta.soft }}>
-      {person.collected ? (
-        <div className={`card-frame rarity-${person.rarity}`}>
-          <button className={`candy-card ${isGlow ? "is-glow" : ""}`} onClick={() => onOpen(person)} aria-label={`查看 ${person.name}`}>
-            <span className={`rarity-tag ${person.rarity === "UR" ? "is-UR" : ""}`}>{rmeta.label}</span>
-            <span className="get-badge"><Heart size={11} fill="white" strokeWidth={0} />GET</span>
-            <div className="portrait" aria-hidden="true">
-              {person.photo_url ? (
-                <img className="portrait-photo" src={person.photo_url} alt="" />
-              ) : (
-                <span className="portrait-glyph">{initials(person.name)}</span>
-              )}
-              <span className="sparkle sparkle-a">✦</span>
-              <span className="sparkle sparkle-b">✧</span>
-              {isGlow && (
-                <>
-                  <span className="sparkle twinkle t1">✦</span>
-                  <span className="sparkle twinkle t2">✧</span>
-                  <span className="sparkle twinkle t3">✦</span>
-                </>
-              )}
-            </div>
-            <div className="card-info">
-              <RarityStars rarity={person.rarity} />
-              <p className="card-name">{person.name}</p>
-              <p className="card-kana">{person.kana}</p>
-            </div>
-            <span className="type-chip">{meta.label}</span>
-            {isGlow && <span className="shine-sweep" aria-hidden="true" />}
-          </button>
-        </div>
-      ) : (
-        <button className="candy-wrap" onClick={() => onToggle(person.id)} aria-label={`解鎖 ${person.name}`}>
-          <span className="wrap-twist wrap-twist-l" />
-          <span className="wrap-twist wrap-twist-r" />
-          <span className="wrap-no">No.{person.no}</span>
-          <span className="wrap-bubble">？</span>
-          <span className="wrap-label">輕點開封</span>
+      <div className={`card-frame rarity-${person.rarity}`}>
+        <button className={`candy-card ${isGlow ? "is-glow" : ""}`} onClick={() => onOpen(person)} aria-label={`查看 ${person.name}`}>
+          <span className="rarity-tag">{rmeta.label}</span>
+          <div className="portrait" aria-hidden="true">
+            {person.photo_url ? (
+              <img className="portrait-photo" src={person.photo_url} alt="" />
+            ) : (
+              <span className="portrait-glyph">{initials(person.name)}</span>
+            )}
+            <span className="sparkle sparkle-a">✦</span>
+            <span className="sparkle sparkle-b">✧</span>
+            {isGlow && (
+              <>
+                <span className="sparkle twinkle t1">✦</span>
+                <span className="sparkle twinkle t2">✧</span>
+                <span className="sparkle twinkle t3">✦</span>
+              </>
+            )}
+          </div>
+          <div className="card-info">
+            <p className="card-name">{person.name}</p>
+            <p className="card-kana">{person.kana}</p>
+          </div>
+          <span className="type-chip">{meta.label}</span>
+          {isGlow && <span className="shine-sweep" aria-hidden="true" />}
         </button>
-      )}
+      </div>
     </div>
   );
 }
 
-function DetailModal({ person, onClose, onToggle }) {
-  if (!person) return null;
+function DetailModal({ person, onClose }) {
+  const [isFlipped, setIsFlipped] = useState(false);
   const meta = TYPE_META[person.type];
   const rmeta = RARITY_META[person.rarity];
   const isGlow = GLOW_TIERS.includes(person.rarity);
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className={`modal-panel rarity-${person.rarity}`}
+        className="flip-shell"
         style={{ "--accent": meta.accent, "--soft": meta.soft, "--rarity": rmeta.color, "--rarity-soft": rmeta.soft }}
         onClick={(e) => e.stopPropagation()}
       >
-        {isGlow && <span className="modal-glow" aria-hidden="true" />}
         <button className="modal-close" onClick={onClose} aria-label="關閉">
           <X size={16} />
         </button>
-        <span className={`modal-ribbon ${person.rarity === "UR" ? "is-UR" : ""}`}>
-          {rmeta.label}・{rmeta.name}
-        </span>
-        <div className="modal-portrait">
-          {person.photo_url ? (
-            <img className="modal-portrait-photo" src={person.photo_url} alt="" />
-          ) : (
-            <span>{initials(person.name)}</span>
-          )}
+
+        <div className="flip-container" onClick={() => setIsFlipped((f) => !f)} role="button" tabIndex={0} aria-label="點擊翻面">
+          <div className={`flip-card ${isFlipped ? "is-flipped" : ""}`}>
+            {/* ---------- 正面：大圖 + 稀有度外框 ---------- */}
+            <div className={`flip-face flip-front rarity-${person.rarity}`}>
+              {isGlow && <span className="modal-glow" aria-hidden="true" />}
+              <div className="ornate-frame">
+                <div className="frame-photo">
+                  {person.photo_url ? (
+                    <img className="frame-photo-img" src={person.photo_url} alt="" />
+                  ) : (
+                    <span className="frame-photo-glyph">{initials(person.name)}</span>
+                  )}
+                  {isGlow && (
+                    <>
+                      <span className="sparkle twinkle t1">✦</span>
+                      <span className="sparkle twinkle t2">✧</span>
+                      <span className="sparkle twinkle t3">✦</span>
+                    </>
+                  )}
+                </div>
+                <CornerOrnament style={{ position: "absolute", top: 8, left: 8 }} color={rmeta.color} />
+                <CornerOrnament style={{ position: "absolute", top: 8, right: 8, transform: "scaleX(-1)" }} color={rmeta.color} />
+                <CornerOrnament style={{ position: "absolute", bottom: 8, left: 8, transform: "scaleY(-1)" }} color={rmeta.color} />
+                <CornerOrnament style={{ position: "absolute", bottom: 8, right: 8, transform: "scale(-1,-1)" }} color={rmeta.color} />
+                <span className="rarity-medallion">{rmeta.label}</span>
+                <div className="nameplate">
+                  <p className="nameplate-name">{person.name}</p>
+                  <p className="nameplate-group">{person.group_name}</p>
+                </div>
+                {isGlow && <span className="shine-sweep" aria-hidden="true" />}
+              </div>
+            </div>
+
+            {/* ---------- 背面：縮圖 + 基本資料 ---------- */}
+            <div className="flip-face flip-back">
+              <div className="modal-portrait">
+                {person.photo_url ? (
+                  <img className="modal-portrait-photo" src={person.photo_url} alt="" />
+                ) : (
+                  <span>{initials(person.name)}</span>
+                )}
+              </div>
+              <span className="rarity-tag static-tag">{rmeta.label}・{rmeta.name}</span>
+              <span className="type-chip modal-chip">{meta.label}</span>
+              <h2 className="modal-name">{person.name}</h2>
+              <p className="modal-kana">{person.kana}</p>
+              <dl className="modal-meta">
+                <div>
+                  <dt>所屬</dt>
+                  <dd>{person.group_name}</dd>
+                </div>
+                <div>
+                  <dt>圖鑑編號</dt>
+                  <dd>No.{person.no}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
         </div>
-        <RarityStars rarity={person.rarity} size={13} />
-        <span className="type-chip modal-chip">{meta.label}</span>
-        <h2 className="modal-name">{person.name}</h2>
-        <p className="modal-kana">{person.kana}</p>
-        <dl className="modal-meta">
-          <div>
-            <dt>所屬</dt>
-            <dd>{person.group_name}</dd>
-          </div>
-          <div>
-            <dt>圖鑑編號</dt>
-            <dd>No.{person.no}</dd>
-          </div>
-        </dl>
-        <button className="modal-unmark" onClick={() => onToggle(person.id)}>
-          從圖鑑中移除收藏
-        </button>
+
+        <p className="flip-hint">
+          <RotateCw size={12} /> 點擊卡片翻面
+        </p>
       </div>
     </div>
   );
@@ -170,7 +194,6 @@ export default function IdolZukan() {
       if (cancelled) return;
 
       if (error) {
-        // 抓不到資料庫（例如還沒設定 .env）時，保留 mock data 讓畫面還能運作
         setLoadError(error.message);
       } else if (data && data.length > 0) {
         setPeople(data);
@@ -184,37 +207,22 @@ export default function IdolZukan() {
     };
   }, []);
 
-  const toggleCollected = async (id) => {
-    const target = people.find((p) => p.id === id);
-    if (!target) return;
-    const nextCollected = !target.collected;
-
-    // 先更新畫面（樂觀更新），再同步寫回 Supabase
-    setPeople((prev) => prev.map((p) => (p.id === id ? { ...p, collected: nextCollected } : p)));
-
-    const { error } = await supabase.from("people").update({ collected: nextCollected }).eq("id", id);
-    if (error) {
-      // 寫入失敗就退回原本的狀態，並提示錯誤
-      setPeople((prev) => prev.map((p) => (p.id === id ? { ...p, collected: !nextCollected } : p)));
-      console.error("更新收藏狀態失敗：", error.message);
-    }
-  };
-
   const filtered = useMemo(() => {
     return people.filter((p) => {
       const matchesType = activeType === "all" || p.type === activeType;
       const matchesRarity = activeRarity === "all" || p.rarity === activeRarity;
       const q = query.trim().toLowerCase();
       const matchesQuery =
-        !q || p.name.toLowerCase().includes(q) || p.kana.toLowerCase().includes(q) || (p.group_name || "").toLowerCase().includes(q);
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.kana.toLowerCase().includes(q) ||
+        (p.group_name || "").toLowerCase().includes(q);
       return matchesType && matchesRarity && matchesQuery;
     });
   }, [people, query, activeType, activeRarity]);
 
-  const totalCollected = people.filter((p) => p.collected).length;
   const rarityBreakdown = RARITY_ORDER.map((r) => ({
     rarity: r,
-    collected: people.filter((p) => p.rarity === r && p.collected).length,
     total: people.filter((p) => p.rarity === r).length,
   }));
 
@@ -257,16 +265,16 @@ export default function IdolZukan() {
         .zukan-sub { color: var(--ink-soft); font-size: 13.5px; font-weight: 600; margin: 0; }
         .zukan-status { color: var(--lilac); font-size: 11.5px; font-weight: 700; margin: 8px 0 0; }
 
-        .rarity-board { max-width: 700px; margin: 22px auto 8px; display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
+        .rarity-board { max-width: 700px; margin: 22px auto 30px; display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
         .rarity-pill {
           display: flex; flex-direction: column; align-items: center; gap: 3px;
-          background: white; border-radius: 16px; padding: 10px 14px;
+          background: white; border-radius: 16px; padding: 10px 16px;
           box-shadow: 0 0 0 2px var(--pc-soft), 0 4px 10px -6px rgba(74,46,67,0.3);
-          min-width: 64px; position: relative;
+          min-width: 56px; position: relative;
         }
         .rarity-pill.tier-SSR { box-shadow: 0 0 0 2px var(--pc), 0 4px 14px -6px rgba(255,111,160,0.5); }
         .rarity-pill.tier-UR { box-shadow: 0 0 0 2px var(--pc), 0 4px 16px -6px rgba(184,77,255,0.55); }
-        .rarity-pill-label { font-size: 12px; font-weight: 800; color: var(--pc); letter-spacing: 0.03em; }
+        .rarity-pill-label { font-size: 13px; font-weight: 800; color: var(--pc); letter-spacing: 0.03em; }
         .rarity-pill.tier-UR .rarity-pill-label {
           background: linear-gradient(90deg, #FF6FA0, #FFD766, #5FD9B9, #6FA8FF, #B84DFF, #FF6FA0);
           background-size: 300% 100%;
@@ -274,12 +282,6 @@ export default function IdolZukan() {
           animation: gradient-shift 3s linear infinite;
         }
         .rarity-pill-count { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
-        .rarity-pill-stars { display: flex; gap: 1px; }
-
-        .progress-row { max-width: 380px; margin: 16px auto 22px; display: flex; align-items: center; gap: 8px; justify-content: center; }
-        .progress-track { width: 140px; height: 6px; border-radius: 999px; background: white; box-shadow: inset 0 0 0 1.5px var(--line); overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--pink), var(--lilac)); }
-        .progress-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
 
         .toolbar { max-width: 780px; margin: 0 auto 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
         .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 320px; }
@@ -305,7 +307,6 @@ export default function IdolZukan() {
         .card-slot { aspect-ratio: 3 / 4.3; position: relative; }
 
         .card-frame { position: relative; width: 100%; height: 100%; }
-        /* 發散光暈：呼吸感的模糊光斑，取代旋轉光環，天然圓角不需要 overflow 裁切 */
         .card-frame.rarity-SSR::before,
         .card-frame.rarity-UR::before {
           content: ""; position: absolute; inset: -16px; z-index: 0; border-radius: 50%;
@@ -343,16 +344,8 @@ export default function IdolZukan() {
           background: var(--rarity); color: white; font-size: 10px; font-weight: 800;
           padding: 3px 8px; border-radius: 999px; box-shadow: 0 2px 0 rgba(0,0,0,0.08); letter-spacing: 0.03em;
         }
-        .rarity-tag.is-UR {
-          background: linear-gradient(90deg, #FF6FA0, #FFD766, #5FD9B9, #6FA8FF, #B84DFF, #FF6FA0);
-          background-size: 300% 100%; animation: gradient-shift 3s linear infinite;
-        }
-        .get-badge {
-          position: absolute; top: 8px; right: 8px; z-index: 3;
-          background: var(--accent); color: white; font-size: 9.5px; font-weight: 800;
-          padding: 3px 8px 3px 6px; border-radius: 999px; display: flex; align-items: center; gap: 3px;
-          box-shadow: 0 2px 0 rgba(0,0,0,0.08);
-        }
+        .rarity-tag.static-tag { position: static; display: inline-block; margin-bottom: 10px; white-space: nowrap; }
+
         .portrait {
           flex: 1; display: flex; align-items: center; justify-content: center; position: relative;
           background: linear-gradient(155deg, var(--accent) 0%, var(--soft) 130%);
@@ -370,8 +363,6 @@ export default function IdolZukan() {
         @keyframes twinkle { 0%,100% { opacity: 0.2; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.15); } }
 
         .card-info { padding: 6px 10px 24px; text-align: center; }
-        .rarity-stars { display: inline-flex; gap: 1px; margin-bottom: 2px; }
-        .rarity-stars svg { color: var(--rc); }
         .card-name { margin: 0; font-size: 13px; font-weight: 800; }
         .card-kana { margin: 1px 0 0; font-size: 10px; color: var(--ink-soft); font-weight: 600; }
         .type-chip {
@@ -380,78 +371,89 @@ export default function IdolZukan() {
           padding: 3px 10px; border-radius: 999px; white-space: nowrap;
         }
 
-        .candy-wrap {
-          all: unset; box-sizing: border-box; display: flex; flex-direction: column;
-          align-items: center; justify-content: center; gap: 6px;
-          width: 100%; height: 100%; cursor: pointer; position: relative; border-radius: 22px;
-          background: repeating-linear-gradient(125deg, var(--soft) 0 10px, white 10px 20px);
-          box-shadow: 0 0 0 3px var(--line), 0 8px 16px -10px rgba(74,46,67,0.2);
-          transition: transform 0.16s ease;
-        }
-        .candy-wrap:hover { transform: translateY(-3px) scale(1.02); }
-        .candy-wrap:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-        .wrap-twist { position: absolute; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
-        .wrap-twist-l { left: -9px; border-right: 12px solid var(--accent); }
-        .wrap-twist-r { right: -9px; border-left: 12px solid var(--accent); }
-        .wrap-no { position: absolute; top: 10px; left: 12px; font-size: 10px; font-weight: 800; color: var(--ink-soft); }
-        .wrap-bubble {
-          width: 46px; height: 46px; border-radius: 50%; background: white;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 20px; font-weight: 800; color: var(--accent); box-shadow: 0 0 0 3px var(--accent);
-        }
-        .wrap-label { font-size: 10.5px; font-weight: 700; color: var(--accent); }
-
+        /* ---------- 彈窗翻牌 ---------- */
         .modal-backdrop {
-          position: fixed; inset: 0; background: rgba(74,46,67,0.38); backdrop-filter: blur(3px);
+          position: fixed; inset: 0; background: rgba(74,46,67,0.4); backdrop-filter: blur(3px);
           display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
         }
-        .modal-panel {
-          background: white; border-radius: 26px; border: 4px solid white; position: relative;
-          box-shadow: 0 0 0 4px var(--rarity), 0 24px 50px -20px rgba(74,46,67,0.4);
-          width: 100%; max-width: 320px; padding: 30px 22px 24px; text-align: center;
+        .flip-shell { position: relative; width: 100%; max-width: 320px; }
+        .modal-close {
+          all: unset; position: absolute; top: -14px; right: -14px; z-index: 10;
+          color: var(--ink-soft); cursor: pointer; padding: 7px; background: white;
+          border-radius: 50%; box-shadow: 0 3px 10px -3px rgba(74,46,67,0.4);
         }
-        .modal-glow {
+        .modal-close:hover { color: var(--ink); }
+
+        .flip-container { width: 100%; aspect-ratio: 3 / 4.3; cursor: pointer; perspective: 1400px; }
+        .flip-card {
+          position: relative; width: 100%; height: 100%;
+          transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1);
+        }
+        .flip-card.is-flipped { transform: rotateY(180deg); }
+        .flip-face {
+          position: absolute; inset: 0; backface-visibility: hidden; border-radius: 24px;
+          overflow: hidden; background: white;
+        }
+        .flip-face.flip-back { transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; padding: 26px 20px 20px; text-align: center; }
+
+        .flip-face.flip-front {
+          box-shadow: 0 0 0 4px var(--rarity), 0 0 0 7px white, 0 0 0 9px var(--rarity-soft), 0 20px 40px -16px rgba(74,46,67,0.45);
+        }
+        .flip-face.flip-front .modal-glow {
           position: absolute; inset: -20px; z-index: -1; border-radius: 50%;
           background: radial-gradient(circle, var(--rarity) 0%, transparent 70%);
-          filter: blur(22px); opacity: 0.55; animation: pulse-glow 2.4s ease-in-out infinite;
+          filter: blur(24px); opacity: 0.6; animation: pulse-glow 2.4s ease-in-out infinite;
         }
-        .modal-close { all: unset; position: absolute; top: 14px; right: 14px; color: var(--ink-soft); cursor: pointer; padding: 5px; background: var(--line); border-radius: 50%; z-index: 2; }
-        .modal-close:hover { color: var(--ink); }
-        .modal-ribbon {
-          position: absolute; top: -13px; left: 50%; transform: translateX(-50%) rotate(-2deg);
-          background: var(--rarity); color: white; font-size: 10.5px; font-weight: 800;
-          padding: 5px 14px; border-radius: 999px; box-shadow: 0 3px 0 rgba(0,0,0,0.1);
-          white-space: nowrap; z-index: 2;
+
+        .ornate-frame { position: relative; width: 100%; height: 100%; }
+        .frame-photo { position: absolute; inset: 0; background: linear-gradient(160deg, var(--accent) 0%, var(--soft) 140%); display: flex; align-items: center; justify-content: center; }
+        .frame-photo-img { width: 100%; height: 100%; object-fit: cover; }
+        .frame-photo-glyph { font-size: 64px; font-weight: 800; color: white; text-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+        .corner-orn { position: absolute; z-index: 4; opacity: 0.9; }
+
+        .rarity-medallion {
+          position: absolute; top: 14px; left: 14px; z-index: 4;
+          width: 46px; height: 46px; border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, white 0%, var(--rarity) 55%);
+          color: white; display: flex; align-items: center; justify-content: center;
+          font-size: 15px; font-weight: 800; letter-spacing: 0.02em;
+          box-shadow: 0 0 0 2px white, 0 0 0 4px var(--rarity), 0 4px 10px -4px rgba(0,0,0,0.4);
         }
-        .modal-ribbon.is-UR {
-          background: linear-gradient(90deg, #FF6FA0, #FFD766, #5FD9B9, #6FA8FF, #B84DFF, #FF6FA0);
-          background-size: 300% 100%; animation: gradient-shift 3s linear infinite;
+
+        .nameplate {
+          position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
+          padding: 22px 16px 14px; text-align: center;
+          background: linear-gradient(0deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 60%, transparent 100%);
         }
+        .nameplate-name { margin: 0; color: white; font-size: 18px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .nameplate-group { margin: 2px 0 0; color: rgba(255,255,255,0.85); font-size: 11.5px; font-weight: 600; }
+
         .modal-portrait {
-          width: 96px; height: 96px; margin: 14px auto 8px; border-radius: 50%;
+          width: 92px; height: 92px; margin: 6px auto 12px; border-radius: 50%; overflow: hidden;
           background: linear-gradient(155deg, var(--accent), var(--soft) 130%);
           display: flex; align-items: center; justify-content: center;
-          font-size: 38px; font-weight: 800; color: white; box-shadow: 0 0 0 5px var(--soft);
-          overflow: hidden;
+          font-size: 36px; font-weight: 800; color: white; box-shadow: 0 0 0 5px var(--soft);
         }
-        .modal-portrait-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .modal-panel .rarity-stars { justify-content: center; margin-bottom: 8px; }
-        .modal-chip { position: static; display: inline-block; transform: none; margin-bottom: 10px; }
-        .modal-name { margin: 0; font-size: 21px; font-weight: 800; }
+        .modal-portrait-photo { width: 100%; height: 100%; object-fit: cover; }
+        .modal-chip { position: static; display: inline-block; margin-bottom: 10px; }
+        .modal-name { margin: 0; font-size: 20px; font-weight: 800; }
         .modal-kana { margin: 2px 0 16px; color: var(--ink-soft); font-size: 12.5px; font-weight: 600; }
-        .modal-meta { display: flex; justify-content: space-around; background: var(--soft); border-radius: 14px; padding: 12px 0; margin: 0 0 18px; }
+        .modal-meta { display: flex; justify-content: space-around; background: var(--soft); border-radius: 14px; padding: 12px 0; margin: 0; width: 100%; box-sizing: border-box; }
         .modal-meta dt { font-size: 10px; color: var(--ink-soft); margin-bottom: 3px; font-weight: 700; }
         .modal-meta dd { margin: 0; font-size: 13px; font-weight: 800; }
-        .modal-unmark { all: unset; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--ink-soft); border: 2px solid var(--line); border-radius: 999px; padding: 8px 16px; }
-        .modal-unmark:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+        .flip-hint {
+          margin: 14px 0 0; text-align: center; font-size: 11.5px; font-weight: 700; color: white;
+          display: flex; align-items: center; justify-content: center; gap: 5px; opacity: 0.85;
+        }
 
         .empty-state { max-width: 780px; margin: 40px auto; text-align: center; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; }
       `}</style>
 
       <header className="zukan-header">
-        <span className="eyebrow"><Star size={11} fill="#FF6FA0" strokeWidth={0} />Collection Zukan · Prototype</span>
+        <span className="eyebrow">✦ Collection Zukan · Prototype</span>
         <h1 className="zukan-title">推し 図鑑</h1>
-        <p className="zukan-sub">偶像 ・ 演員 ・ コンカフェ嬢 — 依稀有度收藏</p>
+        <p className="zukan-sub">偶像 ・ 演員 ・ コンカフェ嬢 — 依稀有度分類</p>
         {loading && <p className="zukan-status">連接 Supabase 中…目前顯示範例資料</p>}
         {!loading && loadError && (
           <p className="zukan-status">
@@ -461,27 +463,15 @@ export default function IdolZukan() {
       </header>
 
       <div className="rarity-board">
-        {rarityBreakdown.map(({ rarity, collected, total }) => {
+        {rarityBreakdown.map(({ rarity, total }) => {
           const rmeta = RARITY_META[rarity];
           return (
             <div key={rarity} className={`rarity-pill tier-${rarity}`} style={{ "--pc": rmeta.color, "--pc-soft": rmeta.soft }}>
               <span className="rarity-pill-label">{rmeta.label}</span>
-              <span className="rarity-pill-stars">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={8} fill={i < rmeta.stars ? rmeta.color : "transparent"} stroke={rmeta.color} strokeWidth={1.5} />
-                ))}
-              </span>
-              <span className="rarity-pill-count">{collected}/{total}</span>
+              <span className="rarity-pill-count">×{total}</span>
             </div>
           );
         })}
-      </div>
-
-      <div className="progress-row">
-        <div className="progress-track">
-          <div className="progress-fill" style={{ width: `${(totalCollected / people.length) * 100}%` }} />
-        </div>
-        <span className="progress-label">總收藏 {totalCollected}/{people.length}</span>
       </div>
 
       <div className="toolbar">
@@ -519,21 +509,16 @@ export default function IdolZukan() {
       {filtered.length > 0 ? (
         <div className="grid">
           {filtered.map((p) => (
-            <PersonCard key={p.id} person={p} onToggle={toggleCollected} onOpen={setOpenPerson} />
+            <PersonCard key={p.id} person={p} onOpen={setOpenPerson} />
           ))}
         </div>
       ) : (
         <p className="empty-state">找不到符合條件的人物，換個關鍵字或分類看看。</p>
       )}
 
-      <DetailModal
-        person={openPerson}
-        onClose={() => setOpenPerson(null)}
-        onToggle={(id) => {
-          toggleCollected(id);
-          setOpenPerson(null);
-        }}
-      />
+      {openPerson && (
+        <DetailModal key={openPerson.id} person={openPerson} onClose={() => setOpenPerson(null)} />
+      )}
     </div>
   );
 }
