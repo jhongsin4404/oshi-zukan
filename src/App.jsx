@@ -37,6 +37,16 @@ const SR_VARIANT_COLORS = { gold: "#F5A623", red: "#E14C63" };
 const RARITY_ORDER = ["N", "R", "SR", "SSR", "UR"];
 const GLOW_TIERS = ["SSR", "UR"]; // 這兩階會有發散光暈 + 閃亮效果
 
+// 稀有度排序：UR 排最前面，N 排最後面；同稀有度內再依編號排序
+const RARITY_RANK = { N: 0, R: 1, SR: 2, SSR: 3, UR: 4 };
+function sortByRarityDesc(list) {
+  return [...list].sort((a, b) => {
+    const diff = (RARITY_RANK[b.rarity] ?? 0) - (RARITY_RANK[a.rarity] ?? 0);
+    if (diff !== 0) return diff;
+    return (a.no || "").localeCompare(b.no || "");
+  });
+}
+
 function getRarityBg(person) {
   if (person.rarity === "SR") return SR_VARIANT_COLORS[person.variant] || SR_VARIANT_COLORS.gold;
   return RARITY_META[person.rarity].bg;
@@ -205,7 +215,7 @@ function DetailModal({ person, onClose }) {
 
 export default function IdolZukan() {
   // 一開始先用 mock data 顯示畫面，等 Supabase 抓到真實資料後會自動替換
-  const [people, setPeople] = useState(PEOPLE);
+  const [people, setPeople] = useState(() => sortByRarityDesc(PEOPLE));
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState("");
@@ -227,7 +237,7 @@ export default function IdolZukan() {
       if (error) {
         setLoadError(error.message);
       } else if (data && data.length > 0) {
-        setPeople(data);
+        setPeople(sortByRarityDesc(data));
       }
       setLoading(false);
     }
