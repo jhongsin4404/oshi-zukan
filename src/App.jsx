@@ -7,7 +7,7 @@ import { supabase } from "./supabaseClient";
 const TYPE_META = {
   idol: { label: "偶像", accent: "#FF6FA0", soft: "#FFE1ED" },
   actor: { label: "演員", accent: "#5FD9B9", soft: "#DEFAF1" },
-  concafe: { label: "コンカフェ嬢", accent: "#B48CFF", soft: "#ECE1FF" },
+  concafe: { label: "コンカフェ", accent: "#B48CFF", soft: "#ECE1FF" },
 };
 
 // 稀有度顏色設定
