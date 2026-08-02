@@ -89,8 +89,13 @@ function initials(name) {
 function RarityBadge({ rarity, variant, size = "sm" }) {
   const rmeta = RARITY_META[rarity];
   const bg = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.bg;
+  const solid = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.solid;
   return (
-    <span className={`rarity-badge rarity-badge--${size}`} style={{ "--rarity-bg": bg }} aria-hidden="true">
+    <span
+      className={`rarity-badge rarity-badge--${size} rarity-badge--${rarity.toLowerCase()}`}
+      style={{ "--rarity-bg": bg, "--badge-solid": solid }}
+      aria-hidden="true"
+    >
       <span className="rarity-badge-star">✦</span>
       <span>{rmeta.label}</span>
     </span>
@@ -475,14 +480,29 @@ export default function IdolZukan() {
         }
 
         .shine-sweep {
-          position: absolute; inset: -20%; z-index: 4; pointer-events: none;
-          background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.72) 47%, transparent 59%);
-          background-size: 250% 250%; animation: shine-sweep 3.1s ease-in-out infinite;
+          position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden;
+          background: linear-gradient(112deg, transparent 33%, rgba(255,255,255,.08) 40%, rgba(255,255,255,.5) 48%, rgba(255,232,250,.2) 54%, transparent 64%);
+          background-size: 280% 100%; background-position: 180% 0;
+          opacity: 0; mix-blend-mode: screen;
+          animation: pearl-sweep 6.4s cubic-bezier(.38,.02,.28,1) infinite;
+        }
+        .rarity-SSR .shine-sweep {
+          background-image: linear-gradient(112deg, transparent 34%, rgba(231,203,255,.08) 40%, rgba(255,255,255,.52) 48%, rgba(255,218,245,.24) 55%, transparent 64%);
+        }
+        .rarity-UR .shine-sweep {
+          background-image: linear-gradient(112deg, transparent 31%, rgba(255,177,216,.06) 38%, rgba(255,245,185,.3) 44%, rgba(219,255,247,.48) 49%, rgba(211,224,255,.3) 54%, rgba(244,210,255,.12) 59%, transparent 68%);
+          animation-duration: 7.2s;
         }
         .ornate-frame > .shine-sweep {
           inset: var(--photo-window-inset); border-radius: 16%; overflow: hidden;
         }
-        @keyframes shine-sweep { 0% { background-position: 220% 220%; } 100% { background-position: -40% -40%; } }
+        @keyframes pearl-sweep {
+          0%, 42% { background-position: 180% 0; opacity: 0; }
+          48% { opacity: .12; }
+          62% { opacity: .62; }
+          78% { background-position: -80% 0; opacity: .16; }
+          82%, 100% { background-position: -80% 0; opacity: 0; }
+        }
 
         .rarity-tag.static-tag {
           display: inline-block; margin-bottom: 10px; white-space: nowrap;
@@ -503,42 +523,79 @@ export default function IdolZukan() {
         .sparkle { position: absolute; color: white; opacity: 0.85; font-size: 14px; }
         .sparkle-a { top: 12px; left: 14px; }
         .sparkle-b { bottom: 14px; right: 16px; font-size: 11px; }
-        .sparkle.twinkle { animation: twinkle 1.6s ease-in-out infinite; }
+        .sparkle.twinkle {
+          opacity: 0; transform-origin: center;
+          filter: drop-shadow(0 0 3px rgba(255,255,255,.75));
+          animation: twinkle-pop 5.4s ease-in-out infinite;
+        }
         .t1 { top: 20%; right: 20%; font-size: 12px; animation-delay: 0s; }
-        .t2 { bottom: 30%; left: 18%; font-size: 10px; animation-delay: 0.4s; }
-        .t3 { top: 55%; right: 30%; font-size: 9px; animation-delay: 0.8s; }
-        @keyframes twinkle { 0%,100% { opacity: 0.2; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.15); } }
+        .t2 { bottom: 31%; left: 17%; font-size: 10px; animation-delay: 1.8s; }
+        .t3 { top: 54%; right: 27%; font-size: 9px; animation-delay: 3.55s; }
+        .rarity-SSR .sparkle.twinkle { color: #fff8ff; }
+        .rarity-UR .sparkle.twinkle { animation-duration: 6.2s; filter: drop-shadow(0 0 4px rgba(255,236,192,.82)); }
+        @keyframes twinkle-pop {
+          0%, 56%, 100% { opacity: 0; transform: scale(.38) rotate(-18deg); }
+          62% { opacity: .96; transform: scale(1.18) rotate(5deg); }
+          68% { opacity: .32; transform: scale(.86) rotate(16deg); }
+          72% { opacity: 0; transform: scale(.48) rotate(25deg); }
+        }
 
         .card-info {
-          position: absolute; z-index: 6; left: 10%; right: 10%; bottom: 6%; padding: 7px 7px 8px; text-align: center;
-          border: 1px solid rgba(255,255,255,.94); border-radius: 12px;
-          background: var(--paper) center / 220px, rgba(255,255,255,.9);
-          box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-solid) 30%, white), 0 5px 12px -8px rgba(74,46,67,.55), inset 0 1px 0 white;
+          position: absolute; z-index: 6; left: 7.5%; right: 7.5%; bottom: 4.9%;
+          min-height: 21%; box-sizing: border-box; padding: 10px 11px 9px; text-align: center;
+          border: 1px solid rgba(255,255,255,.96); border-top-color: color-mix(in srgb, var(--rarity-solid) 32%, white);
+          border-radius: 5px 5px 14px 13px / 4px 4px 12px 11px;
+          background:
+            linear-gradient(174deg, rgba(255,255,255,.98), rgba(255,251,253,.94)),
+            var(--paper) center / 220px;
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-solid) 20%, white), 0 8px 14px -10px rgba(74,46,67,.58), inset 0 1px 0 white;
+          clip-path: polygon(0 5%, 3% 1%, 49% 0, 97% 1%, 100% 6%, 99% 97%, 96% 100%, 4% 99%, 1% 96%);
         }
-        .card-name { margin: 0; font-size: 13px; font-weight: 900; line-height: 1.2; }
-        .card-kana { margin: 2px 0 0; font-size: 8.5px; color: var(--ink-soft); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-info::before {
+          content: ""; position: absolute; left: 13%; right: 13%; top: 4px; height: 1px;
+          background: repeating-linear-gradient(90deg, var(--rarity-solid) 0 5px, transparent 5px 9px); opacity: .28;
+        }
+        .card-info::after {
+          content: "♡"; position: absolute; left: 9px; bottom: 7px;
+          color: color-mix(in srgb, var(--rarity-solid) 58%, #ef79ab); font-size: 8px; transform: rotate(-9deg);
+        }
+        .card-name { margin: 2px 0 0; font-size: 13px; font-weight: 900; line-height: 1.2; letter-spacing: .035em; }
+        .card-kana { margin: 3px 0 0; padding: 0 27px; font-size: 8.2px; color: var(--ink-soft); font-weight: 700; letter-spacing: .045em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .badge-slot { position: absolute; z-index: 7; pointer-events: none; }
-        .badge-slot--card { top: 8%; left: 8%; }
-        .badge-slot--modal { top: 7%; left: 7%; }
+        .badge-slot--card { top: 7.4%; left: 7.2%; transform: rotate(-3deg); }
+        .badge-slot--modal { top: 6.8%; left: 6.7%; transform: rotate(-3.5deg); }
 
         .rarity-badge {
           display: inline-flex; align-items: center; justify-content: center; gap: 3px;
-          color: white; background: var(--rarity-bg); border: 1px solid rgba(255,255,255,.9);
-          border-radius: 999px; font-weight: 900; letter-spacing: .04em;
-          box-shadow: 0 0 0 1px rgba(75,38,64,.2), 0 4px 10px -5px rgba(74,46,67,.7), inset 0 1px 0 rgba(255,255,255,.7);
-          text-shadow: 0 1px 2px rgba(58,26,48,.35);
+          color: var(--badge-solid); background: var(--paper) center / 130px, rgba(255,255,255,.97);
+          border: 1.5px solid var(--badge-solid);
+          border-radius: 46% 54% 49% 51% / 55% 45% 58% 42%;
+          font-weight: 950; letter-spacing: .055em;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.94), 2px 2px 0 color-mix(in srgb, var(--badge-solid) 48%, white), 0 6px 10px -8px rgba(74,46,67,.76);
+          text-shadow: 0 1px 0 white;
         }
-        .rarity-badge--sm { min-width: 29px; padding: 4px 7px; font-size: 9px; }
-        .rarity-badge--lg { min-width: 42px; padding: 6px 10px; font-size: 12px; }
-        .rarity-badge-star { font-size: .75em; color: #fff7c9; }
+        .rarity-badge::after { content: ""; width: 3px; height: 3px; border-radius: 50%; background: var(--badge-solid); opacity: .48; }
+        .rarity-badge--sm { min-width: 31px; padding: 4px 7px 4px 6px; font-size: 9px; }
+        .rarity-badge--lg { min-width: 45px; padding: 7px 11px 7px 9px; font-size: 12px; }
+        .rarity-badge-star { font-size: .82em; color: color-mix(in srgb, var(--badge-solid) 74%, #ff9ec5); transform: rotate(-8deg); }
+        .rarity-badge--ssr {
+          background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(247,233,255,.95)) padding-box;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.95), 2px 2px 0 #d9b9ff, 0 6px 11px -8px rgba(122,64,180,.78);
+        }
+        .rarity-badge--ur {
+          color: #a34fbb; border-color: transparent;
+          background: linear-gradient(#fffdfd, #fff9fd) padding-box, var(--rarity-bg) border-box;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.96), 2px 2px 0 #f1bcdc, 0 7px 12px -8px rgba(126,66,144,.76);
+        }
 
         .type-chip {
           display: inline-block;
           font-size: 8px; font-weight: 900; background: var(--accent); color: white;
-          padding: 2px 8px; border-radius: 999px; white-space: nowrap;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.48);
+          padding: 2px 8px; border: 1px solid rgba(255,255,255,.9); border-radius: 5px 6px 5px 7px; white-space: nowrap;
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 36%, white), inset 0 1px 0 rgba(255,255,255,.48);
+          transform: rotate(-1.5deg);
         }
-        .type-chip-inline { margin-top: 4px; }
+        .type-chip-inline { position: absolute; right: 9px; bottom: 7px; margin: 0; }
 
         /* ---------- 彈窗翻牌 ---------- */
         .modal-backdrop {
@@ -591,14 +648,27 @@ export default function IdolZukan() {
         .frame-photo-glyph { font-size: 64px; font-weight: 800; color: white; text-shadow: 0 3px 0 rgba(0,0,0,0.1); }
 
         .nameplate {
-          position: absolute; left: 11%; right: 11%; bottom: 7%; z-index: 6;
-          padding: 11px 14px 10px; text-align: center; border: 1px solid rgba(255,255,255,.9); border-radius: 14px;
-          background: var(--paper) center / 250px, rgba(255,255,255,.91);
-          box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-solid) 32%, white), 0 8px 18px -11px rgba(51,20,41,.75), inset 0 1px 0 white;
+          position: absolute; left: 7.2%; right: 7.2%; bottom: 5%; z-index: 6;
+          min-height: 21%; box-sizing: border-box; padding: 16px 18px 12px; text-align: center;
+          border: 1px solid rgba(255,255,255,.96); border-top-color: color-mix(in srgb, var(--rarity-solid) 34%, white);
+          border-radius: 7px 6px 20px 18px / 6px 5px 16px 14px;
+          background:
+            linear-gradient(174deg, rgba(255,255,255,.98), rgba(255,250,253,.95)),
+            var(--paper) center / 250px;
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-solid) 22%, white), 0 11px 20px -15px rgba(51,20,41,.78), inset 0 1px 0 white;
+          clip-path: polygon(0 5%, 2% 1%, 47% 0, 98% 1%, 100% 5%, 99% 97%, 96% 100%, 4% 99%, 1% 96%);
         }
-        .nameplate-name { margin: 0; color: var(--ink); font-size: 18px; font-weight: 900; }
-        .nameplate-divider { display: block; color: var(--rarity-solid); font-size: 8px; margin: 3px auto; }
-        .nameplate-group { margin: 0; color: var(--ink-soft); font-size: 10.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nameplate::before {
+          content: ""; position: absolute; left: 15%; right: 15%; top: 6px; height: 1px;
+          background: repeating-linear-gradient(90deg, var(--rarity-solid) 0 7px, transparent 7px 12px); opacity: .3;
+        }
+        .nameplate::after {
+          content: "♡"; position: absolute; left: 15px; bottom: 12px;
+          color: color-mix(in srgb, var(--rarity-solid) 55%, #ef79ab); font-size: 11px; transform: rotate(-10deg);
+        }
+        .nameplate-name { margin: 0; color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: .045em; }
+        .nameplate-divider { display: block; color: var(--rarity-solid); font-size: 8px; margin: 4px auto 3px; }
+        .nameplate-group { margin: 0; color: var(--ink-soft); font-size: 10.5px; font-weight: 700; letter-spacing: .025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .modal-portrait {
           position: relative; width: 94px; height: 94px; margin: 7px auto 14px; border-radius: 50%; overflow: hidden;
