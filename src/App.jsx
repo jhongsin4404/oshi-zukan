@@ -56,11 +56,31 @@ function getRaritySolid(person) {
   return RARITY_META[person.rarity].solid;
 }
 
-function getFrameAsset(person) {
-  const tier = person.rarity === "SR"
+function getFrameTier(person) {
+  return person.rarity === "SR"
     ? `sr-${person.variant === "red" ? "red" : "gold"}`
     : person.rarity.toLowerCase();
+}
+
+function getFrameAsset(person) {
+  const tier = getFrameTier(person);
   return `/assets/frames/frame-${tier}.webp`;
+}
+
+// The generated files share a 600 x 860 canvas, but their painted pixels use
+// slightly different bounds. These values normalize the visible artwork to a
+// shared 2% safe area so every rendered frame has the same 3:4.3 silhouette.
+const FRAME_ART_LAYOUT = {
+  n: { left: "-1.8123%", top: "-4.1976%", width: "103.9711%", height: "108.7747%" },
+  r: { left: "-1.8123%", top: "-2.665%", width: "103.9711%", height: "105.5754%" },
+  "sr-gold": { left: "-1.7986%", top: "0.8544%", width: "103.5971%", height: "98.5203%" },
+  "sr-red": { left: "-2.5631%", top: "-0.2244%", width: "105.3016%", height: "100.6829%" },
+  ssr: { left: "-0.3579%", top: "0.6237%", width: "101.0526%", height: "98.638%" },
+  ur: { left: "-0.1742%", top: "0.7458%", width: "100.3484%", height: "98.0523%" },
+};
+
+function getFrameArtStyle(person) {
+  return FRAME_ART_LAYOUT[getFrameTier(person)];
 }
 
 const PEOPLE = [
@@ -125,7 +145,7 @@ function PersonCard({ person, onOpen }) {
           </div>
           {isGlow && <span className="shine-sweep" aria-hidden="true" />}
         </button>
-        <img className="card-frame-art" src={getFrameAsset(person)} alt="" draggable="false" />
+        <img className="card-frame-art" src={getFrameAsset(person)} style={getFrameArtStyle(person)} alt="" draggable="false" />
         <span className="badge-slot badge-slot--card">
           <RarityBadge rarity={person.rarity} variant={person.variant} size="sm" />
         </span>
@@ -173,7 +193,7 @@ function DetailModal({ person, onClose }) {
                     </>
                   )}
                 </div>
-                <img className="modal-frame-art" src={getFrameAsset(person)} alt="" draggable="false" />
+                <img className="modal-frame-art" src={getFrameAsset(person)} style={getFrameArtStyle(person)} alt="" draggable="false" />
                 <span className="badge-slot badge-slot--modal">
                   <RarityBadge rarity={person.rarity} variant={person.variant} size="lg" />
                 </span>
@@ -380,6 +400,10 @@ export default function IdolZukan() {
 
         .card-frame {
           position: relative; width: 100%; height: 100%; box-sizing: border-box; isolation: isolate;
+          transition: transform .2s cubic-bezier(.2,.7,.2,1), filter .2s ease;
+        }
+        .card-frame:is(:hover, :focus-within) {
+          z-index: 2; transform: translateY(-5px) rotate(-.8deg) scale(1.015); filter: saturate(1.04);
         }
         .card-frame.rarity-SSR::before,
         .card-frame.rarity-UR::before {
@@ -405,14 +429,12 @@ export default function IdolZukan() {
           position: absolute; inset: var(--photo-window-inset); z-index: 1;
           background: white; border-radius: 16%; overflow: hidden;
           box-shadow: 0 13px 25px -13px rgba(74,46,67,.62), 0 3px 0 rgba(255,255,255,.8) inset;
-          transition: transform .2s cubic-bezier(.2,.7,.2,1), filter .2s ease;
         }
-        .card-frame:hover .candy-card { transform: translateY(-5px) rotate(-.8deg) scale(1.015); filter: saturate(1.04); }
         .candy-card:focus-visible { outline: 3px solid var(--rarity-solid); outline-offset: 4px; }
         .candy-card.is-glow { box-shadow: 0 14px 27px -19px rgba(50,22,42,.52), 0 3px 0 rgba(255,255,255,.85) inset; }
 
         .card-frame-art, .modal-frame-art {
-          position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+          position: absolute; object-fit: fill;
           pointer-events: none; user-select: none; z-index: 5;
         }
 
