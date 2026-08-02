@@ -325,21 +325,46 @@ export default function IdolZukan() {
         .zukan-status { color: var(--lilac); font-size: 11.5px; font-weight: 700; margin: 9px 0 0; }
 
         .rarity-board {
-          max-width: 660px; margin: 24px auto 28px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px;
-          padding: 10px; border: 1px solid rgba(255,255,255,.92); border-radius: 23px;
-          background: var(--paper) center / 300px, rgba(255,255,255,.74);
-          box-shadow: 0 0 0 1px rgba(244,207,224,.8), 0 16px 36px -28px rgba(85,45,75,.65), inset 0 1px 0 white;
+          max-width: 700px; margin: 29px auto 30px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+          padding: 17px 10px 10px; border: 1px solid rgba(255,255,255,.96); border-radius: 22px;
+          background:
+            linear-gradient(105deg, rgba(255,255,255,.9), rgba(255,243,250,.7)),
+            var(--paper) center / 300px;
+          box-shadow: 0 0 0 1.5px rgba(244,189,216,.78), 0 14px 28px -23px rgba(85,45,75,.7), inset 0 1px 0 white;
+          position: relative;
+        }
+        .rarity-board::before {
+          content: "COLLECTION STATUS"; position: absolute; left: 24px; top: -9px;
+          padding: 2px 10px 3px; border: 1px solid #f3c7dc; border-radius: 999px;
+          background: #fffafc; color: #d77aa5; font-size: 8px; font-weight: 900;
+          letter-spacing: .14em; line-height: 1.2; box-shadow: 0 2px 7px rgba(126,72,105,.09);
+        }
+        .rarity-board::after {
+          content: "♡"; position: absolute; right: 22px; top: -10px; padding: 0 5px;
+          background: #fffafc; color: #ee8fb8; font-size: 13px; line-height: 17px;
         }
         .rarity-pill {
           display: flex; flex-direction: column; align-items: center; gap: 3px;
-          background: linear-gradient(145deg, rgba(255,255,255,.95), var(--pc-soft));
-          border: 1px solid white; border-radius: 15px; padding: 9px 8px;
-          box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 28%, white), 0 5px 12px -9px rgba(74,46,67,.5), inset 0 1px 0 white;
+          background:
+            linear-gradient(155deg, rgba(255,255,255,.98) 0 48%, color-mix(in srgb, var(--pc-soft) 82%, white) 100%);
+          border: 1px solid white; border-radius: 11px 11px 14px 14px; padding: 10px 8px 9px;
+          box-shadow:
+            0 0 0 1px color-mix(in srgb, var(--pc) 36%, white),
+            0 3px 0 color-mix(in srgb, var(--pc) 22%, white),
+            0 7px 12px -10px rgba(74,46,67,.5), inset 0 1px 0 white;
           min-width: 0; position: relative; overflow: hidden;
         }
-        .rarity-pill::before { content: "✦"; position: absolute; top: 3px; right: 7px; font-size: 7px; color: var(--pc); opacity: .55; }
-        .rarity-pill.tier-SSR { box-shadow: 0 0 0 1px #b777ff, 0 8px 18px -12px rgba(119,48,217,.72), inset 0 1px 0 white; }
-        .rarity-pill.tier-UR { box-shadow: 0 0 0 1px #e394d1, 0 8px 20px -12px rgba(184,77,255,.78), inset 0 1px 0 white; }
+        .rarity-pill::before {
+          content: "✦"; position: absolute; top: 4px; right: 6px; width: 12px; height: 12px;
+          display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--pc-soft) 68%, white);
+          color: var(--pc); font-size: 6px; opacity: .82; transform: rotate(8deg);
+        }
+        .rarity-pill::after {
+          content: ""; position: absolute; left: 10px; right: 10px; bottom: 4px; height: 1px;
+          background: repeating-linear-gradient(90deg, var(--pc) 0 4px, transparent 4px 7px); opacity: .28;
+        }
+        .rarity-pill.tier-SSR { box-shadow: 0 0 0 1px #c59cff, 0 3px 0 #e4d2ff, 0 8px 16px -12px rgba(119,48,217,.58), inset 0 1px 0 white; }
+        .rarity-pill.tier-UR { box-shadow: 0 0 0 1px #e7a6d7, 0 3px 0 #f7d4eb, 0 8px 17px -12px rgba(184,77,255,.6), inset 0 1px 0 white; }
         .rarity-pill-label { font-size: 13px; font-weight: 900; color: var(--pc); letter-spacing: 0.04em; }
         .rarity-pill.tier-SSR .rarity-pill-label,
         .rarity-pill.tier-UR .rarity-pill-label {
@@ -350,33 +375,60 @@ export default function IdolZukan() {
         }
         .rarity-pill-count { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); }
 
-        .toolbar { max-width: 820px; margin: 0 auto 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+        .toolbar { max-width: 820px; margin: 0 auto 15px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
         .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 320px; }
+        .search-wrap::after {
+          content: "SEARCH"; position: absolute; z-index: 2; left: 18px; top: -7px;
+          padding: 1px 7px; border-radius: 999px; background: #fffafd; border: 1px solid #f3cade;
+          color: #df7fa9; font-size: 7px; font-weight: 900; letter-spacing: .13em; line-height: 12px;
+        }
         .search-wrap svg { position: absolute; z-index: 1; left: 15px; top: 50%; transform: translateY(-50%); color: var(--pink); }
         .search-input {
-          width: 100%; background: var(--paper) center / 260px, white; border: 1px solid white; border-radius: 999px;
-          padding: 11px 15px 11px 40px; color: var(--ink); font-size: 13px; font-weight: 700; outline: none; box-sizing: border-box;
-          box-shadow: 0 0 0 1px var(--line), 0 8px 20px -15px rgba(74,46,67,.7), inset 0 1px 0 white;
+          width: 100%; background: var(--paper) center / 260px, white; border: 1px solid white; border-radius: 14px;
+          padding: 12px 15px 10px 40px; color: var(--ink); font-size: 13px; font-weight: 700; outline: none; box-sizing: border-box;
+          box-shadow: 0 0 0 1.5px var(--line), 0 3px 0 #f8dce9, 0 8px 18px -15px rgba(74,46,67,.68), inset 0 1px 0 white;
           transition: box-shadow .18s ease, transform .18s ease;
         }
-        .search-input:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pink) 72%, white), 0 10px 22px -15px rgba(246,95,151,.8), inset 0 1px 0 white; transform: translateY(-1px); }
+        .search-input:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--pink) 62%, white), 0 3px 0 #f6c6da, 0 10px 22px -15px rgba(246,95,151,.74), inset 0 1px 0 white; transform: translateY(-1px); }
         .search-input::placeholder { color: #D9B9CB; font-weight: 500; }
 
         .type-tabs, .rarity-tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        .rarity-tabs { max-width: 820px; margin: 0 auto 30px; }
+        .rarity-tabs { max-width: 820px; margin: 0 auto 32px; }
         .type-tab {
-          border: 1px solid white; background: var(--paper) center / 230px, white; color: var(--ink-soft);
-          font-size: 12px; font-weight: 800; padding: 8px 15px; border-radius: 999px;
-          box-shadow: 0 0 0 1px var(--line), 0 5px 12px -10px rgba(74,46,67,.6), inset 0 1px 0 white;
-          cursor: pointer; transition: transform .14s ease, box-shadow .14s ease, color .14s ease;
+          min-height: 36px; border: 1px solid white;
+          background:
+            linear-gradient(155deg, rgba(255,255,255,.98) 0 58%, rgba(255,240,248,.9) 100%),
+            var(--paper) center / 230px;
+          color: var(--ink-soft); font-size: 12px; font-weight: 850; letter-spacing: .015em;
+          padding: 8px 16px 8px 30px; border-radius: 11px 11px 13px 13px;
+          box-shadow: 0 0 0 1px var(--line), 0 3px 0 #f5d7e5, 0 7px 12px -10px rgba(74,46,67,.62), inset 0 1px 0 white;
+          cursor: pointer; position: relative; isolation: isolate; overflow: hidden;
+          transition: transform .14s cubic-bezier(.2,.8,.2,1), box-shadow .14s ease, color .14s ease, filter .14s ease;
         }
-        .type-tab:hover { transform: translateY(-2px); color: var(--ink); }
+        .type-tab::before {
+          content: "✦"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%) rotate(-8deg);
+          width: 14px; height: 14px; display: grid; place-items: center; border-radius: 5px;
+          background: color-mix(in srgb, var(--tab-accent, var(--pink)) 13%, white);
+          border: 1px solid color-mix(in srgb, var(--tab-accent, var(--pink)) 34%, white);
+          color: var(--tab-accent, var(--pink)); font-size: 7px; line-height: 1;
+        }
+        .type-tab::after {
+          content: ""; position: absolute; z-index: -1; left: 12%; right: 12%; top: 3px; height: 1px;
+          background: rgba(255,255,255,.9); border-radius: 999px;
+        }
+        .type-tab:hover { transform: translateY(-2px) rotate(-.35deg); color: var(--ink); filter: saturate(1.04); }
+        .type-tab:active { transform: translateY(1px) scale(.98); box-shadow: 0 0 0 1px var(--line), 0 1px 0 #f5d7e5, inset 0 1px 2px rgba(91,51,79,.08); }
         .type-tab:focus-visible { outline: 3px solid color-mix(in srgb, var(--tab-accent, var(--pink)) 45%, white); outline-offset: 2px; }
         .type-tab.active {
-          background: linear-gradient(145deg, color-mix(in srgb, var(--tab-accent, var(--pink)) 82%, white), var(--tab-accent, var(--pink)));
+          background:
+            linear-gradient(155deg, color-mix(in srgb, var(--tab-accent, var(--pink)) 70%, white) 0 48%, var(--tab-accent, var(--pink)) 100%);
           border-color: rgba(255,255,255,.82); color: white;
-          box-shadow: 0 0 0 1px var(--tab-accent, var(--pink)), 0 7px 14px -10px var(--tab-accent, var(--pink)), inset 0 1px 0 rgba(255,255,255,.65);
+          box-shadow: 0 0 0 1px var(--tab-accent, var(--pink)), 0 3px 0 color-mix(in srgb, var(--tab-accent, var(--pink)) 72%, #8b4268), 0 9px 16px -11px var(--tab-accent, var(--pink)), inset 0 1px 0 rgba(255,255,255,.72);
           text-shadow: 0 1px 2px rgba(85,45,75,.2);
+        }
+        .type-tab.active::before {
+          background: rgba(255,255,255,.88); border-color: white; color: var(--tab-accent, var(--pink));
+          box-shadow: 0 1px 4px rgba(76,39,64,.14); transform: translateY(-50%) rotate(8deg) scale(1.04);
         }
 
         .grid { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 31px 21px; }
@@ -573,13 +625,16 @@ export default function IdolZukan() {
 
         @media (max-width: 720px) {
           .zukan-root { padding: 24px 13px 50px; }
-          .rarity-board { margin: 20px auto 23px; gap: 6px; padding: 7px; border-radius: 19px; }
-          .rarity-pill { padding: 8px 3px; border-radius: 12px; }
+          .rarity-board { margin: 25px auto 25px; gap: 6px; padding: 15px 7px 8px; border-radius: 18px; }
+          .rarity-board::before { left: 17px; }
+          .rarity-board::after { right: 15px; }
+          .rarity-pill { padding: 9px 3px 8px; border-radius: 10px 10px 12px 12px; }
           .rarity-pill::before { display: none; }
           .toolbar { flex-direction: column; align-items: stretch; }
           .search-wrap { max-width: none; width: 100%; }
           .type-tabs { gap: 6px; }
-          .type-tabs .type-tab { flex: 1; padding-inline: 8px; }
+          .type-tabs .type-tab { flex: 1; padding: 8px 7px 8px 23px; }
+          .type-tabs .type-tab::before { left: 6px; width: 12px; height: 12px; }
           .rarity-tabs { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding: 3px 2px 10px; margin-bottom: 22px; scrollbar-width: none; }
           .rarity-tabs::-webkit-scrollbar { display: none; }
           .rarity-tabs .type-tab { flex: 0 0 auto; }
@@ -638,6 +693,8 @@ export default function IdolZukan() {
               className={`type-tab ${activeType === t ? "active" : ""}`}
               style={t !== "all" ? { "--tab-accent": TYPE_META[t].accent } : undefined}
               onClick={() => setActiveType(t)}
+              type="button"
+              aria-pressed={activeType === t}
             >
               {t === "all" ? "全部類型" : TYPE_META[t].label}
             </button>
@@ -652,6 +709,8 @@ export default function IdolZukan() {
             className={`type-tab ${activeRarity === r ? "active" : ""}`}
             style={r !== "all" ? { "--tab-accent": RARITY_META[r].solid } : undefined}
             onClick={() => setActiveRarity(r)}
+            type="button"
+            aria-pressed={activeRarity === r}
           >
             {r === "all" ? "全部稀有度" : RARITY_META[r].label}
           </button>
