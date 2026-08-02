@@ -443,6 +443,9 @@ export default function IdolZukan() {
           background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.72) 47%, transparent 59%);
           background-size: 250% 250%; animation: shine-sweep 3.1s ease-in-out infinite;
         }
+        .ornate-frame > .shine-sweep {
+          inset: var(--photo-window-inset); border-radius: 16%; overflow: hidden;
+        }
         @keyframes shine-sweep { 0% { background-position: 220% 220%; } 100% { background-position: -40% -40%; } }
 
         .rarity-tag.static-tag {
