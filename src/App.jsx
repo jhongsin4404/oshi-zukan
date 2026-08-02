@@ -67,22 +67,6 @@ function getFrameAsset(person) {
   return `/assets/frames/frame-${tier}.webp`;
 }
 
-// The generated files share a 600 x 860 canvas, but their painted pixels use
-// slightly different bounds. These values normalize the visible artwork to a
-// shared 2% safe area so every rendered frame has the same 3:4.3 silhouette.
-const FRAME_ART_LAYOUT = {
-  n: { left: "-1.8123%", top: "-4.1976%", width: "103.9711%", height: "108.7747%" },
-  r: { left: "-1.8123%", top: "-2.665%", width: "103.9711%", height: "105.5754%" },
-  "sr-gold": { left: "-1.7986%", top: "0.8544%", width: "103.5971%", height: "98.5203%" },
-  "sr-red": { left: "-2.5631%", top: "-0.2244%", width: "105.3016%", height: "100.6829%" },
-  ssr: { left: "-0.3579%", top: "0.6237%", width: "101.0526%", height: "98.638%" },
-  ur: { left: "-0.1742%", top: "0.7458%", width: "100.3484%", height: "98.0523%" },
-};
-
-function getFrameArtStyle(person) {
-  return FRAME_ART_LAYOUT[getFrameTier(person)];
-}
-
 const PEOPLE = [
   { id: 1, name: "星野 陽菜", kana: "ホシノ ヒナ", type: "idol", group_name: "Prism*Link", no: "001", rarity: "UR" },
   { id: 2, name: "百合川 澪", kana: "ユリカワ ミオ", type: "idol", group_name: "Prism*Link", no: "002", rarity: "SR", variant: "gold" },
@@ -145,7 +129,7 @@ function PersonCard({ person, onOpen }) {
           </div>
           {isGlow && <span className="shine-sweep" aria-hidden="true" />}
         </button>
-        <img className="card-frame-art" src={getFrameAsset(person)} style={getFrameArtStyle(person)} alt="" draggable="false" />
+        <img className="card-frame-art" src={getFrameAsset(person)} alt="" draggable="false" />
         <span className="badge-slot badge-slot--card">
           <RarityBadge rarity={person.rarity} variant={person.variant} size="sm" />
         </span>
@@ -193,7 +177,7 @@ function DetailModal({ person, onClose }) {
                     </>
                   )}
                 </div>
-                <img className="modal-frame-art" src={getFrameAsset(person)} style={getFrameArtStyle(person)} alt="" draggable="false" />
+                <img className="modal-frame-art" src={getFrameAsset(person)} alt="" draggable="false" />
                 <span className="badge-slot badge-slot--modal">
                   <RarityBadge rarity={person.rarity} variant={person.variant} size="lg" />
                 </span>
@@ -434,7 +418,7 @@ export default function IdolZukan() {
         .candy-card.is-glow { box-shadow: 0 14px 27px -19px rgba(50,22,42,.52), 0 3px 0 rgba(255,255,255,.85) inset; }
 
         .card-frame-art, .modal-frame-art {
-          position: absolute; object-fit: fill;
+          position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill;
           pointer-events: none; user-select: none; z-index: 5;
         }
 
