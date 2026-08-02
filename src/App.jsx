@@ -287,6 +287,9 @@ export default function IdolZukan() {
           --lilac: #a777ef;
           --mint: #55cfae;
           --paper: url('/assets/textures/pearl-ui-surface.webp');
+          --card-ratio: 3 / 4.3;
+          --photo-window-inset: 5.3%;
+          --photo-position: 50% 50%;
           font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
           background:
             linear-gradient(rgba(255,247,251,.76), rgba(255,247,251,.86)),
@@ -373,38 +376,43 @@ export default function IdolZukan() {
         }
 
         .grid { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 31px 21px; }
-        .card-slot { aspect-ratio: 3 / 4.3; position: relative; }
+        .card-slot { aspect-ratio: var(--card-ratio); position: relative; }
 
         .card-frame {
           position: relative; width: 100%; height: 100%; box-sizing: border-box; isolation: isolate;
         }
         .card-frame.rarity-SSR::before,
         .card-frame.rarity-UR::before {
-          content: ""; position: absolute; inset: -8%; z-index: -1; border-radius: 34%;
-          filter: blur(17px); animation: pulse-glow 2.7s ease-in-out infinite;
+          content: ""; position: absolute; inset: -5%; z-index: -1; border-radius: 34%;
+          filter: blur(23px); animation: pulse-glow 2.7s ease-in-out infinite;
+          pointer-events: none; will-change: opacity, transform;
         }
-        .card-frame.rarity-SSR::before { background: radial-gradient(ellipse, #a84dff 0%, #ffd766 48%, transparent 72%); opacity: .48; }
+        .card-frame.rarity-SSR::before {
+          --glow-low: .12; --glow-high: .26;
+          background: radial-gradient(ellipse, rgba(168,77,255,.86) 0%, rgba(255,215,102,.5) 42%, transparent 70%);
+        }
         .card-frame.rarity-UR::before {
-          background: conic-gradient(from 0deg, #FF6FA0, #FFD766, #5FD9B9, #6FA8FF, #B84DFF, #FF6FA0);
-          opacity: .46; animation: pulse-glow 2.7s ease-in-out infinite, hue-cycle 5.5s linear infinite;
+          --glow-low: .11; --glow-high: .24;
+          background: conic-gradient(from 0deg, rgba(255,111,160,.76), rgba(255,215,102,.72), rgba(95,217,185,.7), rgba(111,168,255,.72), rgba(184,77,255,.76), rgba(255,111,160,.76));
+          animation: pulse-glow 2.7s ease-in-out infinite, hue-cycle 5.5s linear infinite;
         }
-        @keyframes pulse-glow { 0%,100% { opacity: .28; transform: scale(.94); } 50% { opacity: .62; transform: scale(1.04); } }
-        @keyframes hue-cycle { from { filter: blur(17px) hue-rotate(0deg); } to { filter: blur(17px) hue-rotate(360deg); } }
+        @keyframes pulse-glow { 0%,100% { opacity: var(--glow-low, .12); transform: scale(.98); } 50% { opacity: var(--glow-high, .26); transform: scale(1.045); } }
+        @keyframes hue-cycle { from { filter: blur(23px) hue-rotate(0deg); } to { filter: blur(23px) hue-rotate(360deg); } }
         @keyframes gradient-shift { to { background-position: 300% 0; } }
 
         .candy-card {
           all: unset; box-sizing: border-box; display: block; cursor: pointer;
-          position: absolute; inset: 4.2% 5.3%; z-index: 1;
+          position: absolute; inset: var(--photo-window-inset); z-index: 1;
           background: white; border-radius: 16%; overflow: hidden;
           box-shadow: 0 13px 25px -13px rgba(74,46,67,.62), 0 3px 0 rgba(255,255,255,.8) inset;
           transition: transform .2s cubic-bezier(.2,.7,.2,1), filter .2s ease;
         }
         .card-frame:hover .candy-card { transform: translateY(-5px) rotate(-.8deg) scale(1.015); filter: saturate(1.04); }
         .candy-card:focus-visible { outline: 3px solid var(--rarity-solid); outline-offset: 4px; }
-        .candy-card.is-glow { box-shadow: 0 16px 29px -14px var(--rarity-solid), 0 3px 0 rgba(255,255,255,.85) inset; }
+        .candy-card.is-glow { box-shadow: 0 14px 27px -19px rgba(50,22,42,.52), 0 3px 0 rgba(255,255,255,.85) inset; }
 
         .card-frame-art, .modal-frame-art {
-          position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill;
+          position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
           pointer-events: none; user-select: none; z-index: 5;
         }
 
@@ -428,7 +436,9 @@ export default function IdolZukan() {
         }
         .portrait::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 54%, rgba(67,30,55,.26) 100%); pointer-events: none; }
         .portrait-glyph { font-size: 40px; font-weight: 900; color: white; text-shadow: 0 3px 0 rgba(0,0,0,.08); }
-        .portrait-photo { width: 100%; height: 100%; object-fit: cover; }
+        .portrait-photo, .frame-photo-img {
+          width: 100%; height: 100%; object-fit: cover; object-position: var(--photo-position);
+        }
         .sparkle { position: absolute; color: white; opacity: 0.85; font-size: 14px; }
         .sparkle-a { top: 12px; left: 14px; }
         .sparkle-b { bottom: 14px; right: 16px; font-size: 11px; }
@@ -483,7 +493,7 @@ export default function IdolZukan() {
         .modal-close:hover { color: var(--pink); transform: scale(1.05); }
         .modal-close:focus-visible { outline: 3px solid rgba(255,255,255,.7); outline-offset: 3px; }
 
-        .flip-container { width: 100%; aspect-ratio: 3 / 4.3; cursor: pointer; perspective: 1400px; }
+        .flip-container { width: 100%; aspect-ratio: var(--card-ratio); cursor: pointer; perspective: 1400px; }
         .flip-card {
           position: relative; width: 100%; height: 100%;
           transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(.4,.2,.2,1);
@@ -507,15 +517,16 @@ export default function IdolZukan() {
           filter: drop-shadow(0 19px 18px rgba(42,16,34,.36));
         }
         .flip-face.flip-front .modal-glow {
-          position: absolute; inset: -10%; z-index: -1; border-radius: 38%;
-          background: radial-gradient(circle, var(--rarity-solid) 0%, transparent 70%);
-          filter: blur(27px); opacity: .52; animation: pulse-glow 2.7s ease-in-out infinite;
+          --glow-low: .14; --glow-high: .28;
+          position: absolute; inset: -6%; z-index: -1; border-radius: 38%;
+          background: radial-gradient(circle, color-mix(in srgb, var(--rarity-solid) 76%, transparent) 0%, transparent 68%);
+          filter: blur(32px); animation: pulse-glow 2.7s ease-in-out infinite;
+          pointer-events: none; will-change: opacity, transform;
         }
 
         .ornate-frame { position: relative; width: 100%; height: 100%; border-radius: 26px; }
-        .frame-photo { position: absolute; inset: 4.2% 5.3%; border-radius: 16%; overflow: hidden; background: linear-gradient(160deg, var(--accent) 0%, var(--soft) 140%); display: flex; align-items: center; justify-content: center; }
+        .frame-photo { position: absolute; inset: var(--photo-window-inset); border-radius: 16%; overflow: hidden; background: linear-gradient(160deg, var(--accent) 0%, var(--soft) 140%); display: flex; align-items: center; justify-content: center; }
         .frame-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 58%, rgba(44,17,35,.4)); pointer-events: none; }
-        .frame-photo-img { width: 100%; height: 100%; object-fit: cover; }
         .frame-photo-glyph { font-size: 64px; font-weight: 800; color: white; text-shadow: 0 3px 0 rgba(0,0,0,0.1); }
 
         .nameplate {
