@@ -67,6 +67,13 @@ function getFrameAsset(person) {
   return `/assets/frames/frame-${tier}.webp`;
 }
 
+function getRarityStickerAsset(rarity, variant) {
+  const tier = rarity === "SR"
+    ? `sr-${variant === "red" ? "red" : "gold"}`
+    : rarity.toLowerCase();
+  return `/assets/rarity/rarity-${tier}.png`;
+}
+
 const PEOPLE = [
   { id: 1, name: "星野 陽菜", kana: "ホシノ ヒナ", type: "idol", group_name: "Prism*Link", no: "001", rarity: "UR" },
   { id: 2, name: "百合川 澪", kana: "ユリカワ ミオ", type: "idol", group_name: "Prism*Link", no: "002", rarity: "SR", variant: "gold" },
@@ -90,18 +97,30 @@ function RarityBadge({ rarity, variant, size = "sm" }) {
   const rmeta = RARITY_META[rarity];
   const bg = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.bg;
   const solid = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.solid;
-  const starCount = { N: 0, R: 1, SR: 2, SSR: 1, UR: 3 }[rarity] ?? 0;
+  const starCount = { N: 0, R: 1, SR: 2, SSR: 3, UR: 4 }[rarity] ?? 0;
+  const [assetFailed, setAssetFailed] = useState(false);
   return (
     <span
       className={`rarity-badge rarity-badge--${size} rarity-badge--${rarity.toLowerCase()} ${rarity === "SR" ? `rarity-badge--sr-${variant === "red" ? "red" : "gold"}` : ""}`}
       style={{ "--rarity-bg": bg, "--badge-solid": solid }}
       aria-hidden="true"
     >
-      {rarity === "SSR" && <span className="rarity-badge-crest">☆</span>}
-      <span className="rarity-badge-label">{rmeta.label}</span>
-      {starCount > 0 && (
-        <span className="rarity-badge-stars">
-          {Array.from({ length: starCount }, (_, index) => <span key={index}>✦</span>)}
+      {!assetFailed ? (
+        <img
+          className="rarity-badge-art"
+          src={getRarityStickerAsset(rarity, variant)}
+          alt=""
+          draggable="false"
+          onError={() => setAssetFailed(true)}
+        />
+      ) : (
+        <span className="rarity-badge-fallback">
+          <span>{rmeta.label}</span>
+          {starCount > 0 && (
+            <span className="rarity-badge-fallback-stars">
+              {Array.from({ length: starCount }, (_, index) => <span key={index}>☆</span>)}
+            </span>
+          )}
         </span>
       )}
     </span>
@@ -612,74 +631,49 @@ export default function IdolZukan() {
         .card-name { margin: 2px 0 0; font-size: 13px; font-weight: 900; line-height: 1.2; letter-spacing: .035em; }
         .card-kana { margin: 3px 0 0; padding: 0 12px; font-size: 8.2px; color: var(--ink-soft); font-weight: 700; letter-spacing: .045em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .badge-slot, .type-slot { position: absolute; z-index: 7; pointer-events: none; }
-        .badge-slot--card { top: 7.4%; left: 7.2%; transform: rotate(-3deg); }
-        .badge-slot--modal { top: 6.8%; left: 6.7%; transform: rotate(-3.5deg); }
+        .badge-slot--card { top: 5.6%; left: 5.8%; transform: rotate(-3deg); }
+        .badge-slot--modal { top: 5.2%; left: 5.4%; transform: rotate(-3.5deg); }
         .type-slot--card { top: 7.4%; right: 7.2%; max-width: 45%; transform: rotate(2deg); }
         .type-slot--modal { top: 6.8%; right: 6.7%; max-width: 44%; transform: rotate(2.5deg); }
 
         .rarity-badge {
-          position: relative; isolation: isolate; overflow: visible;
-          display: inline-flex; align-items: center; justify-content: center; gap: 3px;
-          color: color-mix(in srgb, var(--badge-solid) 82%, #54253f);
-          background: var(--paper) center / 130px, rgba(255,255,255,.98);
-          border: 1.25px solid var(--badge-solid);
-          border-radius: 46% 54% 49% 51% / 55% 45% 58% 42%;
-          font-weight: 950; letter-spacing: .055em;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.94), 1.5px 1.5px 0 color-mix(in srgb, var(--badge-solid) 42%, white), 0 6px 10px -8px rgba(74,46,67,.7);
-          text-shadow: 0 1px 0 white;
+          --badge-sm-width: 34px; --badge-lg-width: 57px;
+          position: relative; isolation: isolate; overflow: visible; display: block; line-height: 0;
         }
-        .rarity-badge--sm { min-width: 27px; min-height: 16px; padding: 3px 6px; font-size: 9px; }
-        .rarity-badge--lg { min-width: 42px; min-height: 22px; padding: 6px 10px; font-size: 12px; }
-        .rarity-badge-label, .rarity-badge-stars, .rarity-badge-crest { position: relative; z-index: 2; }
-        .rarity-badge-stars { display: inline-flex; align-items: center; gap: 1px; color: var(--badge-solid); font-size: .58em; letter-spacing: -.12em; text-shadow: 0 1px 0 white; }
-        .rarity-badge--n {
-          color: #419bb8; background: var(--paper) center / 130px, rgba(255,255,255,.98);
-          border-width: 1px; box-shadow: 0 0 0 1.5px rgba(255,255,255,.92), 1px 1px 0 rgba(95,201,232,.27);
+        .rarity-badge--sm { width: var(--badge-sm-width); }
+        .rarity-badge--lg { width: var(--badge-lg-width); }
+        .rarity-badge--n { --badge-sm-width: 29px; --badge-lg-width: 49px; }
+        .rarity-badge--r { --badge-sm-width: 29px; --badge-lg-width: 49px; }
+        .rarity-badge--sr { --badge-sm-width: 45px; --badge-lg-width: 76px; }
+        .rarity-badge--ssr { --badge-sm-width: 53px; --badge-lg-width: 90px; }
+        .rarity-badge--ur { --badge-sm-width: 61px; --badge-lg-width: 104px; }
+        .rarity-badge-art { display: block; width: 100%; height: auto; user-select: none; filter: drop-shadow(0 2px 1px rgba(74,46,67,.2)); }
+        .rarity-badge--ssr::after {
+          content: ""; position: absolute; z-index: 1; inset: 0;
+          background: linear-gradient(108deg, transparent 34%, rgba(255,255,255,.9) 49%, transparent 64%);
+          background-size: 260% 100%; background-position: 155% 0; opacity: 0;
+          -webkit-mask: url('/assets/rarity/rarity-ssr.png') center / contain no-repeat;
+          mask: url('/assets/rarity/rarity-ssr.png') center / contain no-repeat;
+          animation: badge-glint 7.2s ease-in-out var(--shine-delay, 0s) infinite;
         }
-        .rarity-badge--r {
-          color: #8a6711; background: linear-gradient(150deg, #fff9d8 0%, #ffe99b 100%);
-          border-color: #e8b92d; box-shadow: 0 0 0 2px rgba(255,255,255,.94), 2px 2px 0 #f2cf5e, 0 6px 10px -8px rgba(112,76,5,.58);
-        }
-        .rarity-badge--sr {
-          background: linear-gradient(155deg, rgba(255,255,255,.99), color-mix(in srgb, var(--badge-solid) 15%, white));
-          border-width: 1.5px;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.96), 0 0 0 3.5px var(--badge-solid), 2px 2px 0 color-mix(in srgb, var(--badge-solid) 55%, white), 0 7px 11px -9px rgba(86,45,30,.72);
-        }
-        .rarity-badge--sr-gold { color: #9a6210; }
-        .rarity-badge--sr-red { color: #a82f49; }
-        .rarity-badge--ssr {
-          overflow: hidden; color: #723095; border-color: #ad68d5;
-          background:
-            radial-gradient(circle at 20% 24%, rgba(255,255,255,.94) 0 8%, transparent 9%),
-            linear-gradient(125deg, #f8ddff 0%, #e5bdf6 34%, #ffd5ea 67%, #f1dfff 100%);
-          box-shadow: 0 0 0 2px rgba(255,255,255,.95), 2px 2px 0 #d49ee9, 0 7px 12px -8px rgba(122,64,180,.76);
-        }
-        .rarity-badge--ssr::before {
-          content: ""; position: absolute; z-index: 1; inset: -35% auto -35% -45%; width: 24%; transform: skewX(-18deg);
-          background: rgba(255,255,255,.86); filter: blur(1px); opacity: 0;
-          animation: badge-glint 6.8s ease-in-out var(--shine-delay, 0s) infinite;
-        }
-        .rarity-badge-crest { color: #9f56c6; font-size: 1em; line-height: 1; transform: rotate(-8deg); }
-        .rarity-badge--ssr .rarity-badge-stars { color: #cf71ad; }
         @keyframes badge-glint {
-          0%, 62%, 100% { left: -45%; opacity: 0; }
-          67% { opacity: .72; }
-          75% { left: 122%; opacity: 0; }
+          0%, 62%, 100% { background-position: 155% 0; opacity: 0; }
+          68% { opacity: .8; }
+          76% { background-position: -70% 0; opacity: 0; }
         }
-        .rarity-badge--ur {
-          color: #7f3b8d; border: 1.5px solid transparent;
-          border-radius: 43% 57% 47% 53% / 59% 43% 57% 41%;
-          background:
-            linear-gradient(125deg, #fff3fa 0%, #fff6cb 23%, #eafff7 45%, #edf3ff 67%, #f6e8ff 84%, #fff0f7 100%) padding-box,
-            conic-gradient(from 20deg, #ff8eb8, #ffd96e, #72dfc0, #83b8ff, #c388ff, #ff8eb8) border-box;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.97), 2px 2px 0 #efb7dc, 0 0 10px rgba(255,177,225,.28), 0 7px 12px -8px rgba(126,66,144,.72);
+        .rarity-badge--ur .rarity-badge-art { animation: ur-sticker-breathe 7.2s ease-in-out var(--shine-delay, 0s) infinite; }
+        @keyframes ur-sticker-breathe {
+          0%, 100% { filter: drop-shadow(0 2px 1px rgba(74,46,67,.2)) drop-shadow(0 0 0 rgba(173,117,255,0)); }
+          50% { filter: saturate(1.1) brightness(1.045) drop-shadow(0 2px 1px rgba(74,46,67,.2)) drop-shadow(0 0 5px rgba(173,117,255,.34)); }
         }
-        .rarity-badge--ur::after {
-          content: ""; position: absolute; z-index: -1; inset: -6px; border-radius: inherit;
-          background: conic-gradient(from 10deg, rgba(255,142,184,.24), rgba(255,217,110,.19), rgba(114,223,192,.21), rgba(131,184,255,.2), rgba(195,136,255,.23), rgba(255,142,184,.24));
-          filter: blur(6px); opacity: .34;
+        .rarity-badge-fallback {
+          display: inline-flex; align-items: center; justify-content: center; gap: 2px; min-width: 100%; box-sizing: border-box;
+          padding: 4px 6px; border: 1.5px solid var(--badge-solid); border-radius: 48% 52% 46% 54% / 55% 45% 58% 42%;
+          background: rgba(255,255,255,.96); color: color-mix(in srgb, var(--badge-solid) 82%, #54253f);
+          font-size: 9px; font-weight: 950; line-height: 1; letter-spacing: .03em; box-shadow: 0 0 0 2px white;
         }
-        .rarity-badge--ur .rarity-badge-stars { color: #a85fb7; }
+        .rarity-badge--lg .rarity-badge-fallback { padding: 7px 9px; font-size: 13px; }
+        .rarity-badge-fallback-stars { display: inline-flex; gap: 1px; font-size: .62em; letter-spacing: -.12em; }
 
         .type-sticker {
           position: relative; display: inline-flex; align-items: center; justify-content: center;
@@ -829,9 +823,8 @@ export default function IdolZukan() {
           .card-name { font-size: 11.5px; }
           .card-kana { font-size: 7.5px; }
           .type-chip { font-size: 7px; }
-          .type-sticker--sm { max-width: 72px; padding-inline: 5px; font-size: 7px; }
-          .rarity-badge--sm { padding-inline: 5px; }
-          .rarity-badge--sm .rarity-badge-stars { font-size: .52em; }
+          .type-sticker--sm { max-width: 62px; padding-inline: 5px; font-size: 7px; }
+          .rarity-badge--sm { transform: scale(.9); transform-origin: top left; }
         }
 
         @media (prefers-reduced-motion: reduce) {
