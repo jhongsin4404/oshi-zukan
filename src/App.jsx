@@ -102,13 +102,22 @@ function RarityBadge({ rarity, variant, size = "sm" }) {
   );
 }
 
-function PersonCard({ person, onOpen }) {
+function PersonCard({ person, onOpen, animationIndex = 0 }) {
   const meta = TYPE_META[person.type];
   const isGlow = GLOW_TIERS.includes(person.rarity);
   const rbg = getRarityBg(person);
   const rsolid = getRaritySolid(person);
   return (
-    <div className="card-slot" style={{ "--accent": meta.accent, "--soft": meta.soft, "--rarity-bg": rbg, "--rarity-solid": rsolid }}>
+    <div
+      className="card-slot"
+      style={{
+        "--accent": meta.accent,
+        "--soft": meta.soft,
+        "--rarity-bg": rbg,
+        "--rarity-solid": rsolid,
+        "--shine-delay": `${animationIndex * 0.16}s`,
+      }}
+    >
       <div className={`card-frame rarity-${person.rarity}`}>
         <button className={`candy-card ${isGlow ? "is-glow" : ""}`} onClick={() => onOpen(person)} aria-label={`查看 ${person.name}`}>
           <div className="portrait" aria-hidden="true">
@@ -231,8 +240,8 @@ function DetailModal({ person, onClose }) {
 }
 
 export default function IdolZukan() {
-  // 一開始先用 mock data 顯示畫面，等 Supabase 抓到真實資料後會自動替換
-  const [people, setPeople] = useState(() => sortByRarityDesc(PEOPLE));
+  // 載入完成前保持空資料，避免範例卡先掛載而讓動畫提早起跑
+  const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState("");
@@ -253,8 +262,11 @@ export default function IdolZukan() {
 
       if (error) {
         setLoadError(error.message);
+        setPeople(sortByRarityDesc(PEOPLE));
       } else if (data && data.length > 0) {
         setPeople(sortByRarityDesc(data));
+      } else {
+        setPeople(sortByRarityDesc(PEOPLE));
       }
       setLoading(false);
     }
@@ -484,14 +496,13 @@ export default function IdolZukan() {
           background: linear-gradient(112deg, transparent 33%, rgba(255,255,255,.08) 40%, rgba(255,255,255,.5) 48%, rgba(255,232,250,.2) 54%, transparent 64%);
           background-size: 280% 100%; background-position: 180% 0;
           opacity: 0; mix-blend-mode: screen;
-          animation: pearl-sweep 6.4s cubic-bezier(.38,.02,.28,1) infinite;
+          animation: pearl-sweep 7.2s cubic-bezier(.38,.02,.28,1) var(--shine-delay, 0s) infinite;
         }
         .rarity-SSR .shine-sweep {
           background-image: linear-gradient(112deg, transparent 34%, rgba(231,203,255,.08) 40%, rgba(255,255,255,.52) 48%, rgba(255,218,245,.24) 55%, transparent 64%);
         }
         .rarity-UR .shine-sweep {
           background-image: linear-gradient(112deg, transparent 31%, rgba(255,177,216,.06) 38%, rgba(255,245,185,.3) 44%, rgba(219,255,247,.48) 49%, rgba(211,224,255,.3) 54%, rgba(244,210,255,.12) 59%, transparent 68%);
-          animation-duration: 7.2s;
         }
         .ornate-frame > .shine-sweep {
           inset: var(--photo-window-inset); border-radius: 16%; overflow: hidden;
@@ -539,6 +550,25 @@ export default function IdolZukan() {
           68% { opacity: .32; transform: scale(.86) rotate(16deg); }
           72% { opacity: 0; transform: scale(.48) rotate(25deg); }
         }
+
+        .loading-grid { pointer-events: none; }
+        .loading-card {
+          aspect-ratio: var(--card-ratio); border-radius: 12%; position: relative; overflow: hidden;
+          border: 1px solid rgba(244,207,224,.92);
+          background: linear-gradient(145deg, rgba(255,255,255,.94), rgba(255,241,248,.88));
+          box-shadow: 0 12px 26px -22px rgba(74,46,67,.5), inset 0 0 0 7px rgba(255,255,255,.56);
+        }
+        .loading-card::before {
+          content: ""; position: absolute; inset: 6% 7% 24%; border-radius: 14%;
+          background: linear-gradient(105deg, #f8eaf1 20%, #fffafd 43%, #f3e3ed 66%);
+          background-size: 220% 100%; animation: loading-pearl 1.7s ease-in-out infinite;
+        }
+        .loading-card::after {
+          content: ""; position: absolute; left: 12%; right: 12%; bottom: 8%; height: 10%;
+          border-radius: 8px; background: rgba(247,225,236,.88);
+          box-shadow: 0 -12px 0 -3px rgba(250,234,242,.76);
+        }
+        @keyframes loading-pearl { from { background-position: 145% 0; } to { background-position: -85% 0; } }
 
         .card-info {
           position: absolute; z-index: 6; left: 7.5%; right: 7.5%; bottom: 4.9%;
@@ -731,7 +761,7 @@ export default function IdolZukan() {
         <span className="eyebrow">✦ Collection Zukan · Prototype</span>
         <h1 className="zukan-title">推し 図鑑</h1>
         <p className="zukan-sub">偶像 ・ 演員 ・ コンカフェ嬢 — 依稀有度分類</p>
-        {loading && <p className="zukan-status">連接 Supabase 中…目前顯示範例資料</p>}
+        {loading && <p className="zukan-status" role="status">連接 Supabase 中…</p>}
         {!loading && loadError && (
           <p className="zukan-status">
             尚未連上 Supabase（{loadError}），目前顯示範例資料。請確認 .env 是否設定正確。
@@ -739,6 +769,12 @@ export default function IdolZukan() {
         )}
       </header>
 
+      {loading ? (
+        <div className="grid loading-grid" aria-hidden="true">
+          {Array.from({ length: 5 }, (_, index) => <div className="loading-card" key={index} />)}
+        </div>
+      ) : (
+        <>
       <div className="rarity-board">
         {rarityBreakdown.map(({ rarity, total }) => {
           const rmeta = RARITY_META[rarity];
@@ -790,7 +826,12 @@ export default function IdolZukan() {
       {filtered.length > 0 ? (
         <div className="grid">
           {filtered.map((p) => (
-            <PersonCard key={p.id} person={p} onOpen={setOpenPerson} />
+            <PersonCard
+              key={p.id}
+              person={p}
+              onOpen={setOpenPerson}
+              animationIndex={people.findIndex((person) => person.id === p.id)}
+            />
           ))}
         </div>
       ) : (
@@ -799,6 +840,8 @@ export default function IdolZukan() {
 
       {openPerson && (
         <DetailModal key={openPerson.id} person={openPerson} onClose={() => setOpenPerson(null)} />
+      )}
+        </>
       )}
     </div>
   );
