@@ -5,9 +5,9 @@ import { supabase } from "./supabaseClient";
 // ---------- Mock data ----------
 // 真實上線時，圖片建議改用官方釋出的宣傳素材或自製插畫，避免直接盜用寫真照片
 const TYPE_META = {
-  idol: { label: "偶像", accent: "#FF6FA0", soft: "#FFE1ED" },
-  actor: { label: "演員", accent: "#5FD9B9", soft: "#DEFAF1" },
-  concafe: { label: "コンカフェ", accent: "#B48CFF", soft: "#ECE1FF" },
+  idol: { label: "偶像", shortLabel: "偶像", accent: "#FF6FA0", soft: "#FFE1ED" },
+  actor: { label: "演員", shortLabel: "演員", accent: "#5FD9B9", soft: "#DEFAF1" },
+  concafe: { label: "コンカフェ", shortLabel: "コンカフェ", accent: "#B48CFF", soft: "#ECE1FF" },
 };
 
 // 稀有度顏色設定
@@ -90,14 +90,29 @@ function RarityBadge({ rarity, variant, size = "sm" }) {
   const rmeta = RARITY_META[rarity];
   const bg = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.bg;
   const solid = rarity === "SR" ? SR_VARIANT_COLORS[variant] || SR_VARIANT_COLORS.gold : rmeta.solid;
+  const starCount = { N: 0, R: 1, SR: 2, SSR: 1, UR: 3 }[rarity] ?? 0;
   return (
     <span
-      className={`rarity-badge rarity-badge--${size} rarity-badge--${rarity.toLowerCase()}`}
+      className={`rarity-badge rarity-badge--${size} rarity-badge--${rarity.toLowerCase()} ${rarity === "SR" ? `rarity-badge--sr-${variant === "red" ? "red" : "gold"}` : ""}`}
       style={{ "--rarity-bg": bg, "--badge-solid": solid }}
       aria-hidden="true"
     >
-      <span className="rarity-badge-star">✦</span>
-      <span>{rmeta.label}</span>
+      {rarity === "SSR" && <span className="rarity-badge-crest">☆</span>}
+      <span className="rarity-badge-label">{rmeta.label}</span>
+      {starCount > 0 && (
+        <span className="rarity-badge-stars">
+          {Array.from({ length: starCount }, (_, index) => <span key={index}>✦</span>)}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function TypeSticker({ type, size = "sm" }) {
+  const meta = TYPE_META[type];
+  return (
+    <span className={`type-sticker type-sticker--${size}`} aria-hidden="true">
+      <span>{size === "sm" ? meta.shortLabel : meta.label}</span>
     </span>
   );
 }
@@ -139,13 +154,15 @@ function PersonCard({ person, onOpen, animationIndex = 0 }) {
           <div className="card-info">
             <p className="card-name">{person.name}</p>
             <p className="card-kana">{person.kana}</p>
-            <span className="type-chip type-chip-inline">{meta.label}</span>
           </div>
           {isGlow && <span className="shine-sweep" aria-hidden="true" />}
         </button>
         <img className="card-frame-art" src={getFrameAsset(person)} alt="" draggable="false" />
         <span className="badge-slot badge-slot--card">
           <RarityBadge rarity={person.rarity} variant={person.variant} size="sm" />
+        </span>
+        <span className="type-slot type-slot--card">
+          <TypeSticker type={person.type} size="sm" />
         </span>
       </div>
     </div>
@@ -195,10 +212,13 @@ function DetailModal({ person, onClose }) {
                 <span className="badge-slot badge-slot--modal">
                   <RarityBadge rarity={person.rarity} variant={person.variant} size="lg" />
                 </span>
+                <span className="type-slot type-slot--modal">
+                  <TypeSticker type={person.type} size="lg" />
+                </span>
                 <div className="nameplate">
                   <p className="nameplate-name">{person.name}</p>
                   <span className="nameplate-divider">✦</span>
-                  <p className="nameplate-group">{person.group_name}</p>
+                  <p className="nameplate-kana">{person.kana}</p>
                 </div>
                 {isGlow && <span className="shine-sweep" aria-hidden="true" />}
               </div>
@@ -590,33 +610,94 @@ export default function IdolZukan() {
           color: color-mix(in srgb, var(--rarity-solid) 58%, #ef79ab); font-size: 8px; transform: rotate(-9deg);
         }
         .card-name { margin: 2px 0 0; font-size: 13px; font-weight: 900; line-height: 1.2; letter-spacing: .035em; }
-        .card-kana { margin: 3px 0 0; padding: 0 27px; font-size: 8.2px; color: var(--ink-soft); font-weight: 700; letter-spacing: .045em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .badge-slot { position: absolute; z-index: 7; pointer-events: none; }
+        .card-kana { margin: 3px 0 0; padding: 0 12px; font-size: 8.2px; color: var(--ink-soft); font-weight: 700; letter-spacing: .045em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .badge-slot, .type-slot { position: absolute; z-index: 7; pointer-events: none; }
         .badge-slot--card { top: 7.4%; left: 7.2%; transform: rotate(-3deg); }
         .badge-slot--modal { top: 6.8%; left: 6.7%; transform: rotate(-3.5deg); }
+        .type-slot--card { top: 7.4%; right: 7.2%; max-width: 45%; transform: rotate(2deg); }
+        .type-slot--modal { top: 6.8%; right: 6.7%; max-width: 44%; transform: rotate(2.5deg); }
 
         .rarity-badge {
+          position: relative; isolation: isolate; overflow: visible;
           display: inline-flex; align-items: center; justify-content: center; gap: 3px;
-          color: var(--badge-solid); background: var(--paper) center / 130px, rgba(255,255,255,.97);
-          border: 1.5px solid var(--badge-solid);
+          color: color-mix(in srgb, var(--badge-solid) 82%, #54253f);
+          background: var(--paper) center / 130px, rgba(255,255,255,.98);
+          border: 1.25px solid var(--badge-solid);
           border-radius: 46% 54% 49% 51% / 55% 45% 58% 42%;
           font-weight: 950; letter-spacing: .055em;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.94), 2px 2px 0 color-mix(in srgb, var(--badge-solid) 48%, white), 0 6px 10px -8px rgba(74,46,67,.76);
+          box-shadow: 0 0 0 2px rgba(255,255,255,.94), 1.5px 1.5px 0 color-mix(in srgb, var(--badge-solid) 42%, white), 0 6px 10px -8px rgba(74,46,67,.7);
           text-shadow: 0 1px 0 white;
         }
-        .rarity-badge::after { content: ""; width: 3px; height: 3px; border-radius: 50%; background: var(--badge-solid); opacity: .48; }
-        .rarity-badge--sm { min-width: 31px; padding: 4px 7px 4px 6px; font-size: 9px; }
-        .rarity-badge--lg { min-width: 45px; padding: 7px 11px 7px 9px; font-size: 12px; }
-        .rarity-badge-star { font-size: .82em; color: color-mix(in srgb, var(--badge-solid) 74%, #ff9ec5); transform: rotate(-8deg); }
+        .rarity-badge--sm { min-width: 27px; min-height: 16px; padding: 3px 6px; font-size: 9px; }
+        .rarity-badge--lg { min-width: 42px; min-height: 22px; padding: 6px 10px; font-size: 12px; }
+        .rarity-badge-label, .rarity-badge-stars, .rarity-badge-crest { position: relative; z-index: 2; }
+        .rarity-badge-stars { display: inline-flex; align-items: center; gap: 1px; color: var(--badge-solid); font-size: .58em; letter-spacing: -.12em; text-shadow: 0 1px 0 white; }
+        .rarity-badge--n {
+          color: #419bb8; background: var(--paper) center / 130px, rgba(255,255,255,.98);
+          border-width: 1px; box-shadow: 0 0 0 1.5px rgba(255,255,255,.92), 1px 1px 0 rgba(95,201,232,.27);
+        }
+        .rarity-badge--r {
+          color: #8a6711; background: linear-gradient(150deg, #fff9d8 0%, #ffe99b 100%);
+          border-color: #e8b92d; box-shadow: 0 0 0 2px rgba(255,255,255,.94), 2px 2px 0 #f2cf5e, 0 6px 10px -8px rgba(112,76,5,.58);
+        }
+        .rarity-badge--sr {
+          background: linear-gradient(155deg, rgba(255,255,255,.99), color-mix(in srgb, var(--badge-solid) 15%, white));
+          border-width: 1.5px;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.96), 0 0 0 3.5px var(--badge-solid), 2px 2px 0 color-mix(in srgb, var(--badge-solid) 55%, white), 0 7px 11px -9px rgba(86,45,30,.72);
+        }
+        .rarity-badge--sr-gold { color: #9a6210; }
+        .rarity-badge--sr-red { color: #a82f49; }
         .rarity-badge--ssr {
-          background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(247,233,255,.95)) padding-box;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.95), 2px 2px 0 #d9b9ff, 0 6px 11px -8px rgba(122,64,180,.78);
+          overflow: hidden; color: #723095; border-color: #ad68d5;
+          background:
+            radial-gradient(circle at 20% 24%, rgba(255,255,255,.94) 0 8%, transparent 9%),
+            linear-gradient(125deg, #f8ddff 0%, #e5bdf6 34%, #ffd5ea 67%, #f1dfff 100%);
+          box-shadow: 0 0 0 2px rgba(255,255,255,.95), 2px 2px 0 #d49ee9, 0 7px 12px -8px rgba(122,64,180,.76);
+        }
+        .rarity-badge--ssr::before {
+          content: ""; position: absolute; z-index: 1; inset: -35% auto -35% -45%; width: 24%; transform: skewX(-18deg);
+          background: rgba(255,255,255,.86); filter: blur(1px); opacity: 0;
+          animation: badge-glint 6.8s ease-in-out var(--shine-delay, 0s) infinite;
+        }
+        .rarity-badge-crest { color: #9f56c6; font-size: 1em; line-height: 1; transform: rotate(-8deg); }
+        .rarity-badge--ssr .rarity-badge-stars { color: #cf71ad; }
+        @keyframes badge-glint {
+          0%, 62%, 100% { left: -45%; opacity: 0; }
+          67% { opacity: .72; }
+          75% { left: 122%; opacity: 0; }
         }
         .rarity-badge--ur {
-          color: #a34fbb; border-color: transparent;
-          background: linear-gradient(#fffdfd, #fff9fd) padding-box, var(--rarity-bg) border-box;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.96), 2px 2px 0 #f1bcdc, 0 7px 12px -8px rgba(126,66,144,.76);
+          color: #7f3b8d; border: 1.5px solid transparent;
+          border-radius: 43% 57% 47% 53% / 59% 43% 57% 41%;
+          background:
+            linear-gradient(125deg, #fff3fa 0%, #fff6cb 23%, #eafff7 45%, #edf3ff 67%, #f6e8ff 84%, #fff0f7 100%) padding-box,
+            conic-gradient(from 20deg, #ff8eb8, #ffd96e, #72dfc0, #83b8ff, #c388ff, #ff8eb8) border-box;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.97), 2px 2px 0 #efb7dc, 0 0 10px rgba(255,177,225,.28), 0 7px 12px -8px rgba(126,66,144,.72);
         }
+        .rarity-badge--ur::after {
+          content: ""; position: absolute; z-index: -1; inset: -6px; border-radius: inherit;
+          background: conic-gradient(from 10deg, rgba(255,142,184,.24), rgba(255,217,110,.19), rgba(114,223,192,.21), rgba(131,184,255,.2), rgba(195,136,255,.23), rgba(255,142,184,.24));
+          filter: blur(6px); opacity: .34;
+        }
+        .rarity-badge--ur .rarity-badge-stars { color: #a85fb7; }
+
+        .type-sticker {
+          position: relative; display: inline-flex; align-items: center; justify-content: center;
+          box-sizing: border-box; max-width: 100%; color: color-mix(in srgb, var(--accent) 72%, #54253f);
+          background: linear-gradient(158deg, rgba(255,255,255,.98), color-mix(in srgb, var(--soft) 72%, white));
+          border: 1.25px solid color-mix(in srgb, var(--accent) 68%, white);
+          border-radius: 5px 7px 6px 8px / 7px 5px 8px 6px;
+          clip-path: polygon(2% 6%, 96% 1%, 100% 18%, 98% 93%, 5% 100%, 0 82%);
+          box-shadow: 0 0 0 2px rgba(255,255,255,.94), 2px 2px 0 color-mix(in srgb, var(--accent) 34%, white), 0 6px 10px -8px rgba(74,46,67,.72);
+          font-weight: 900; line-height: 1; letter-spacing: .025em; text-shadow: 0 1px 0 white;
+        }
+        .type-sticker::before {
+          content: ""; width: 3px; height: 3px; margin-right: 4px; flex: 0 0 auto;
+          border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1px rgba(255,255,255,.85);
+        }
+        .type-sticker > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .type-sticker--sm { min-width: 34px; padding: 4px 7px 4px 6px; font-size: 7.8px; }
+        .type-sticker--lg { min-width: 48px; padding: 7px 11px 7px 9px; font-size: 10px; }
 
         .type-chip {
           display: inline-block;
@@ -625,8 +706,6 @@ export default function IdolZukan() {
           box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 36%, white), inset 0 1px 0 rgba(255,255,255,.48);
           transform: rotate(-1.5deg);
         }
-        .type-chip-inline { position: absolute; right: 9px; bottom: 7px; margin: 0; }
-
         /* ---------- 彈窗翻牌 ---------- */
         .modal-backdrop {
           position: fixed; inset: 0; background: rgba(63,31,55,.58); backdrop-filter: blur(8px) saturate(.82);
@@ -698,7 +777,7 @@ export default function IdolZukan() {
         }
         .nameplate-name { margin: 0; color: var(--ink); font-size: 18px; font-weight: 900; letter-spacing: .045em; }
         .nameplate-divider { display: block; color: var(--rarity-solid); font-size: 8px; margin: 4px auto 3px; }
-        .nameplate-group { margin: 0; color: var(--ink-soft); font-size: 10.5px; font-weight: 700; letter-spacing: .025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nameplate-kana { margin: 0; color: var(--ink-soft); font-size: 10.5px; font-weight: 700; letter-spacing: .055em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .modal-portrait {
           position: relative; width: 94px; height: 94px; margin: 7px auto 14px; border-radius: 50%; overflow: hidden;
@@ -750,6 +829,9 @@ export default function IdolZukan() {
           .card-name { font-size: 11.5px; }
           .card-kana { font-size: 7.5px; }
           .type-chip { font-size: 7px; }
+          .type-sticker--sm { max-width: 72px; padding-inline: 5px; font-size: 7px; }
+          .rarity-badge--sm { padding-inline: 5px; }
+          .rarity-badge--sm .rarity-badge-stars { font-size: .52em; }
         }
 
         @media (prefers-reduced-motion: reduce) {
