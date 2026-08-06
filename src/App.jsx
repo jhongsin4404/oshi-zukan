@@ -643,7 +643,7 @@ export default function IdolZukan() {
         .rarity-badge--sm { width: var(--badge-sm-width); }
         .rarity-badge--lg { width: var(--badge-lg-width); }
         .rarity-badge--n { --badge-sm-width: 29px; --badge-lg-width: 49px; }
-        .rarity-badge--r { --badge-sm-width: 29px; --badge-lg-width: 49px; }
+        .rarity-badge--r { --badge-sm-width: 33px; --badge-lg-width: 55px; }
         .rarity-badge--sr { --badge-sm-width: 45px; --badge-lg-width: 76px; }
         .rarity-badge--ssr { --badge-sm-width: 53px; --badge-lg-width: 90px; }
         .rarity-badge--ur { --badge-sm-width: 61px; --badge-lg-width: 104px; }
