@@ -191,7 +191,6 @@ function PersonCard({ person, onOpen, animationIndex = 0 }) {
 function DetailModal({ person, onClose }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const meta = TYPE_META[person.type];
-  const rmeta = RARITY_META[person.rarity];
   const isGlow = GLOW_TIERS.includes(person.rarity);
   const rbg = getRarityBg(person);
   const rsolid = getRaritySolid(person);
@@ -243,29 +242,51 @@ function DetailModal({ person, onClose }) {
               </div>
             </div>
 
-            {/* ---------- 背面：縮圖 + 基本資料 ---------- */}
+            {/* ---------- 背面：收藏卡人物資料頁 ---------- */}
             <div className="flip-face flip-back">
-              <div className="modal-portrait">
-                {person.photo_url ? (
-                  <img className="modal-portrait-photo" src={person.photo_url} alt="" />
-                ) : (
-                  <span>{initials(person.name)}</span>
-                )}
+              <header className="profile-card-header">
+                <div className="profile-card-heading">
+                  <span className="profile-card-kicker">OSHI ZUKAN / PROFILE CARD</span>
+                  <RarityBadge rarity={person.rarity} variant={person.variant} size="lg" />
+                </div>
+                <span className="profile-card-number" aria-label={`圖鑑編號 ${person.no}`}>
+                  <small>COLLECTION No.</small>
+                  <strong>{person.no}</strong>
+                </span>
+              </header>
+
+              <div className="profile-card-main">
+                <div className="profile-polaroid" aria-hidden="true">
+                  <span className="profile-tape" />
+                  <div className="profile-polaroid-photo">
+                    {person.photo_url ? (
+                      <img className="profile-polaroid-img" src={person.photo_url} alt="" />
+                    ) : (
+                      <span>{initials(person.name)}</span>
+                    )}
+                  </div>
+                  <span className="profile-polaroid-caption">MY OSHI ♡</span>
+                </div>
+
+                <div className="profile-identity">
+                  <span className="profile-label">PROFILE</span>
+                  <h2 className="modal-name">{person.name}</h2>
+                  <p className="modal-kana">{person.kana}</p>
+                  <span className="profile-name-underline" aria-hidden="true" />
+                  <TypeSticker type={person.type} size="lg" />
+                </div>
               </div>
-              <span className="rarity-tag static-tag">{rmeta.label}・{rmeta.name}</span>
-              <span className="type-chip modal-chip">{meta.label}</span>
-              <h2 className="modal-name">{person.name}</h2>
-              <p className="modal-kana">{person.kana}</p>
-              <dl className="modal-meta">
-                <div>
-                  <dt>所屬</dt>
-                  <dd>{person.group_name}</dd>
-                </div>
-                <div>
-                  <dt>圖鑑編號</dt>
-                  <dd>No.{person.no}</dd>
-                </div>
-              </dl>
+
+              <div className="profile-affiliation">
+                <span className="profile-affiliation-label">所属 / GROUP</span>
+                <strong>{person.group_name}</strong>
+                <span className="profile-affiliation-heart" aria-hidden="true">♡</span>
+              </div>
+
+              <footer className="profile-card-footer" aria-hidden="true">
+                <span>MY OSHI COLLECTION</span>
+                <span>✦ {meta.shortLabel} ✦</span>
+              </footer>
             </div>
           </div>
         </div>
@@ -725,12 +746,21 @@ export default function IdolZukan() {
           background: white;
         }
         .flip-face.flip-back {
-          transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; padding: 30px 23px 22px; text-align: center; overflow: hidden;
-          background: var(--paper) center / 320px, white; border: 1px solid rgba(255,255,255,.96);
+          transform: rotateY(180deg); display: flex; flex-direction: column; padding: 27px 24px 21px; text-align: left; overflow: hidden;
+          background:
+            linear-gradient(152deg, rgba(255,255,255,.72), color-mix(in srgb, var(--soft) 24%, rgba(255,255,255,.9))),
+            var(--paper) center / 320px,
+            white;
+          border: 1px solid rgba(255,255,255,.96);
           box-shadow: 0 0 0 3px var(--rarity-solid), 0 0 0 7px white, 0 22px 42px -18px rgba(42,16,34,.65);
         }
         .flip-face.flip-back::before {
-          content: ""; position: absolute; inset: 10px; border: 1px dashed color-mix(in srgb, var(--rarity-solid) 44%, white); border-radius: 20px; pointer-events: none;
+          content: ""; position: absolute; inset: 10px; border: 1px dashed color-mix(in srgb, var(--rarity-solid) 40%, white); border-radius: 20px; pointer-events: none;
+        }
+        .flip-face.flip-back::after {
+          content: "OSHI"; position: absolute; right: -9px; bottom: 38px; z-index: 0;
+          color: color-mix(in srgb, var(--rarity-solid) 9%, transparent); font-size: 72px; font-weight: 950; line-height: 1;
+          letter-spacing: -.08em; transform: rotate(-90deg); transform-origin: center; pointer-events: none;
         }
 
         .flip-face.flip-front {
@@ -773,20 +803,84 @@ export default function IdolZukan() {
         .nameplate-divider { display: block; color: var(--rarity-solid); font-size: 8px; margin: 4px auto 3px; }
         .nameplate-kana { margin: 0; color: var(--ink-soft); font-size: 10.5px; font-weight: 700; letter-spacing: .055em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .modal-portrait {
-          position: relative; width: 94px; height: 94px; margin: 7px auto 14px; border-radius: 50%; overflow: hidden;
-          background: linear-gradient(155deg, var(--accent), var(--soft) 130%);
-          display: flex; align-items: center; justify-content: center;
-          font-size: 36px; font-weight: 900; color: white;
-          box-shadow: 0 0 0 4px white, 0 0 0 6px var(--rarity-solid), 0 9px 18px -12px rgba(74,46,67,.8);
+        .profile-card-header {
+          position: relative; z-index: 2; min-height: 78px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+          padding: 0 3px 14px; border-bottom: 1px dashed color-mix(in srgb, var(--rarity-solid) 34%, white);
         }
-        .modal-portrait-photo { width: 100%; height: 100%; object-fit: cover; }
-        .modal-chip { position: static; display: inline-block; margin-bottom: 10px; }
-        .modal-name { margin: 0; font-size: 20px; font-weight: 900; }
-        .modal-kana { margin: 2px 0 16px; color: var(--ink-soft); font-size: 12.5px; font-weight: 600; }
-        .modal-meta { display: flex; justify-content: space-around; background: color-mix(in srgb, var(--soft) 74%, white); border: 1px solid white; border-radius: 16px; padding: 13px 0; margin: 0; width: 100%; box-sizing: border-box; box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, white), inset 0 1px 0 white; }
-        .modal-meta dt { font-size: 10px; color: var(--ink-soft); margin-bottom: 3px; font-weight: 700; }
-        .modal-meta dd { margin: 0; font-size: 13px; font-weight: 900; }
+        .profile-card-heading { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+        .profile-card-heading .rarity-badge { transform: rotate(-2.5deg); transform-origin: left center; }
+        .profile-card-kicker {
+          color: color-mix(in srgb, var(--rarity-solid) 74%, var(--ink)); font-size: 7.5px; font-weight: 900;
+          letter-spacing: .115em; white-space: nowrap;
+        }
+        .profile-card-number {
+          flex: 0 0 auto; min-width: 73px; box-sizing: border-box; margin-top: 1px; padding: 8px 8px 7px; text-align: center;
+          color: color-mix(in srgb, var(--rarity-solid) 70%, var(--ink)); background: rgba(255,255,255,.68);
+          border: 1px solid color-mix(in srgb, var(--rarity-solid) 26%, white); border-radius: 48% 52% 46% 54% / 55% 48% 52% 45%;
+          box-shadow: 0 2px 0 rgba(255,255,255,.9), 0 7px 14px -12px rgba(74,46,67,.7); transform: rotate(1.5deg);
+        }
+        .profile-card-number small { display: block; font-size: 6.5px; font-weight: 850; letter-spacing: .08em; line-height: 1; }
+        .profile-card-number strong { display: block; margin-top: 3px; font-size: 21px; font-weight: 950; letter-spacing: .08em; line-height: 1; }
+
+        .profile-card-main {
+          position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: center;
+          gap: 18px; min-height: 224px; padding: 18px 6px 13px;
+        }
+        .profile-polaroid {
+          position: relative; width: 100%; max-width: 142px; box-sizing: border-box; justify-self: center; padding: 8px 8px 29px;
+          background: linear-gradient(165deg, rgba(255,255,255,.99), #fffafb); border: 1px solid rgba(255,255,255,.98);
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--rarity-solid) 18%, white), 0 10px 18px -13px rgba(74,46,67,.84);
+          transform: rotate(-3deg);
+        }
+        .profile-tape {
+          position: absolute; z-index: 3; top: -9px; left: 50%; width: 54px; height: 19px; transform: translateX(-50%) rotate(2deg);
+          background: color-mix(in srgb, var(--accent) 18%, rgba(255,251,231,.9)); opacity: .9;
+          border-left: 1px dashed color-mix(in srgb, var(--accent) 25%, white); border-right: 1px dashed color-mix(in srgb, var(--accent) 25%, white);
+          clip-path: polygon(2% 10%, 100% 0, 96% 91%, 4% 100%);
+          box-shadow: 0 1px 2px rgba(74,46,67,.08);
+        }
+        .profile-polaroid-photo {
+          aspect-ratio: 1 / 1; overflow: hidden; display: flex; align-items: center; justify-content: center;
+          color: white; font-size: 44px; font-weight: 950; background: linear-gradient(155deg, var(--accent), var(--soft) 130%);
+        }
+        .profile-polaroid-img { width: 100%; height: 100%; object-fit: cover; object-position: var(--photo-position); }
+        .profile-polaroid-caption {
+          position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: var(--ink-soft);
+          font-family: "Comic Sans MS", "Hiragino Maru Gothic ProN", cursive; font-size: 9px; font-weight: 800; letter-spacing: .08em;
+        }
+
+        .profile-identity { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+        .profile-label {
+          margin-bottom: 8px; padding: 2px 7px 2px 8px; color: white; background: var(--accent); border-radius: 3px 5px 4px 6px;
+          font-size: 7px; font-weight: 900; letter-spacing: .12em; box-shadow: 1px 2px 0 color-mix(in srgb, var(--accent) 30%, white); transform: rotate(-1deg);
+        }
+        .modal-name {
+          max-width: 100%; margin: 0; color: var(--ink); font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+          font-size: clamp(22px, 7vw, 29px); font-weight: 950; line-height: 1.16; letter-spacing: .035em; overflow-wrap: anywhere;
+          text-shadow: 0 2px 0 white;
+        }
+        .modal-kana { max-width: 100%; margin: 5px 0 0; color: var(--ink-soft); font-size: 9.5px; font-weight: 750; letter-spacing: .055em; line-height: 1.35; overflow-wrap: anywhere; }
+        .profile-name-underline {
+          width: min(96px, 92%); height: 6px; margin: 7px 0 11px; opacity: .72;
+          background: linear-gradient(176deg, transparent 36%, color-mix(in srgb, var(--rarity-solid) 68%, white) 39% 61%, transparent 64%);
+          border-radius: 50%; transform: rotate(-2deg);
+        }
+        .profile-identity .type-sticker { max-width: 100%; transform: rotate(1.5deg); }
+
+        .profile-affiliation {
+          position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; min-height: 57px; box-sizing: border-box;
+          margin: 2px 5px 0; padding: 10px 42px 9px 16px; background: color-mix(in srgb, var(--soft) 62%, rgba(255,255,255,.92));
+          border: 1px solid white; border-radius: 7px 9px 8px 10px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, white), 2px 3px 0 color-mix(in srgb, var(--accent) 13%, white);
+          clip-path: polygon(1% 5%, 98% 0, 100% 92%, 3% 100%, 0 77%);
+        }
+        .profile-affiliation-label { color: var(--ink-soft); font-size: 7px; font-weight: 900; letter-spacing: .12em; }
+        .profile-affiliation strong { margin-top: 3px; color: var(--ink); font-size: 13px; font-weight: 900; letter-spacing: .025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .profile-affiliation-heart { position: absolute; right: 16px; top: 50%; color: var(--accent); font-size: 22px; transform: translateY(-50%) rotate(8deg); }
+        .profile-card-footer {
+          position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: auto; padding: 11px 5px 0;
+          color: color-mix(in srgb, var(--rarity-solid) 52%, var(--ink-soft)); border-top: 1px dotted color-mix(in srgb, var(--rarity-solid) 26%, white);
+          font-size: 6.5px; font-weight: 900; letter-spacing: .12em;
+        }
 
         .flip-hint {
           margin: 14px 0 0; text-align: center; font-size: 11.5px; font-weight: 700; color: white;
