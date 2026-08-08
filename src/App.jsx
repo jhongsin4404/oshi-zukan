@@ -270,7 +270,7 @@ function DetailModal({ person, onClose }) {
 
                 <div className="profile-identity">
                   <span className="profile-label">PROFILE</span>
-                  <h2 className="modal-name">{person.name}</h2>
+                  <h2 className={`modal-name ${[...person.name].length >= 5 ? "is-long" : ""}`}>{person.name}</h2>
                   <p className="modal-kana">{person.kana}</p>
                   <span className="profile-name-underline" aria-hidden="true" />
                   <TypeSticker type={person.type} size="lg" />
@@ -859,6 +859,7 @@ export default function IdolZukan() {
           font-size: clamp(22px, 7vw, 29px); font-weight: 950; line-height: 1.16; letter-spacing: .035em; overflow-wrap: anywhere;
           text-shadow: 0 2px 0 white;
         }
+        .modal-name.is-long { font-size: clamp(18px, 5vw, 22px); letter-spacing: 0; white-space: nowrap; }
         .modal-kana { max-width: 100%; margin: 5px 0 0; color: var(--ink-soft); font-size: 9.5px; font-weight: 750; letter-spacing: .055em; line-height: 1.35; overflow-wrap: anywhere; }
         .profile-name-underline {
           width: min(96px, 92%); height: 6px; margin: 7px 0 11px; opacity: .72;
