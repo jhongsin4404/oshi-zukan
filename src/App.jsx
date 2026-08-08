@@ -400,11 +400,12 @@ export default function IdolZukan() {
           -webkit-background-clip: text; background-clip: text; color: transparent;
           filter: drop-shadow(0 2px 0 white);
         }
-        .zukan-sub { color: var(--ink-soft); font-size: 13px; font-weight: 700; margin: 0; letter-spacing: .02em; }
-        .zukan-status { color: var(--lilac); font-size: 11.5px; font-weight: 700; margin: 9px 0 0; }
+        .zukan-sub { color: var(--ink-soft); font-family: var(--font-title); font-size: 13px; font-weight: 700; margin: 0; letter-spacing: .02em; }
+        .zukan-status { color: var(--lilac); font-family: var(--font-title); font-size: 11.5px; font-weight: 700; margin: 9px 0 0; }
 
         .rarity-board {
           max-width: 700px; margin: 29px auto 30px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+          font-family: var(--font-title);
           padding: 17px 10px 10px; border: 1px solid rgba(255,255,255,.96); border-radius: 22px;
           background:
             linear-gradient(105deg, rgba(255,255,255,.9), rgba(255,243,250,.7)),
@@ -454,7 +455,7 @@ export default function IdolZukan() {
         }
         .rarity-pill-count { font-size: 10.5px; font-weight: 800; color: var(--ink-soft); }
 
-        .toolbar { max-width: 820px; margin: 0 auto 15px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; }
+        .toolbar { max-width: 820px; margin: 0 auto 15px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; font-family: var(--font-title); }
         .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 320px; }
         .search-wrap::after {
           content: "SEARCH"; position: absolute; z-index: 2; left: 18px; top: -7px;
@@ -464,7 +465,7 @@ export default function IdolZukan() {
         .search-wrap svg { position: absolute; z-index: 1; left: 15px; top: 50%; transform: translateY(-50%); color: var(--pink); }
         .search-input {
           width: 100%; background: var(--paper) center / 260px, white; border: 1px solid white; border-radius: 14px;
-          padding: 12px 15px 10px 40px; color: var(--ink); font-size: 13px; font-weight: 700; outline: none; box-sizing: border-box;
+          padding: 12px 15px 10px 40px; color: var(--ink); font-family: var(--font-title); font-size: 13px; font-weight: 700; outline: none; box-sizing: border-box;
           box-shadow: 0 0 0 1.5px var(--line), 0 3px 0 #f8dce9, 0 8px 18px -15px rgba(74,46,67,.68), inset 0 1px 0 white;
           transition: box-shadow .18s ease, transform .18s ease;
         }
@@ -472,13 +473,13 @@ export default function IdolZukan() {
         .search-input::placeholder { color: #D9B9CB; font-weight: 500; }
 
         .type-tabs, .rarity-tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        .rarity-tabs { max-width: 820px; margin: 0 auto 32px; }
+        .rarity-tabs { max-width: 820px; margin: 0 auto 32px; font-family: var(--font-title); }
         .type-tab {
           min-height: 36px; border: 1px solid white;
           background:
             linear-gradient(155deg, rgba(255,255,255,.98) 0 58%, rgba(255,240,248,.9) 100%),
             var(--paper) center / 230px;
-          color: var(--ink-soft); font-size: 12px; font-weight: 850; letter-spacing: .015em;
+          color: var(--ink-soft); font-family: var(--font-title); font-size: 12px; font-weight: 850; letter-spacing: .015em;
           padding: 8px 16px 8px 30px; border-radius: 11px 11px 13px 13px;
           box-shadow: 0 0 0 1px var(--line), 0 3px 0 #f5d7e5, 0 7px 12px -10px rgba(74,46,67,.62), inset 0 1px 0 white;
           cursor: pointer; position: relative; isolation: isolate; overflow: hidden;
