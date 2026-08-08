@@ -371,6 +371,8 @@ export default function IdolZukan() {
           --card-ratio: 3 / 4.3;
           --photo-window-inset: 5.3%;
           --photo-position: 50% 50%;
+          --font-title: "Yomogi", cursive;
+          --font-card-name: "Hachi Maru Pop", cursive;
           font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
           background:
             linear-gradient(rgba(255,247,251,.76), rgba(255,247,251,.86)),
@@ -393,7 +395,7 @@ export default function IdolZukan() {
           box-shadow: 0 0 0 1px var(--line), 0 8px 18px -14px rgba(91,51,79,.8), inset 0 1px 0 white;
         }
         .zukan-title {
-          margin: 14px 0 2px; font-size: clamp(34px, 6vw, 48px); font-weight: 900; letter-spacing: 0.04em;
+          margin: 14px 0 2px; font-family: var(--font-title); font-size: clamp(34px, 6vw, 48px); font-weight: 700; letter-spacing: 0.04em;
           background: linear-gradient(100deg, #ed4f8a 5%, #a36ee8 52%, #42bfa0 96%);
           -webkit-background-clip: text; background-clip: text; color: transparent;
           filter: drop-shadow(0 2px 0 white);
@@ -861,6 +863,12 @@ export default function IdolZukan() {
         }
         .modal-name.is-long { font-size: clamp(18px, 5vw, 22px); letter-spacing: 0; white-space: nowrap; }
         .modal-kana { max-width: 100%; margin: 5px 0 0; color: var(--ink-soft); font-size: 9.5px; font-weight: 750; letter-spacing: .055em; line-height: 1.35; overflow-wrap: anywhere; }
+        .card-name,
+        .card-kana,
+        .nameplate-name,
+        .nameplate-kana,
+        .modal-name,
+        .modal-kana { font-family: var(--font-card-name); }
         .profile-name-underline {
           width: min(96px, 92%); height: 6px; margin: 7px 0 11px; opacity: .72;
           background: linear-gradient(176deg, transparent 36%, color-mix(in srgb, var(--rarity-solid) 68%, white) 39% 61%, transparent 64%);
